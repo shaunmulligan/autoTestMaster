@@ -22,12 +22,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shaunmulligan/resin-sync-device-side.git"
+    "url": "git+https://github.com/shaunmulligan/autoTestMaster.git"
   },
   "author": "Shaun Mulligan <shaun@resin.io>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/shaunmulligan/resin-sync-device-side/issues"
+    "url": "https://github.com/shaunmulligan/autoTestMaster.git/issues"
   },
-  "homepage": "https://github.com/shaunmulligan/resin-sync-device-side#readme"
+  "homepage": "https://github.com/shaunmulligan/autoTestMaster.git#readme"
 }

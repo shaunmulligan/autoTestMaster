@@ -12,8 +12,8 @@ token = process.env.TOKEN
 pathToImg = '/data/test.img'
 parameters =
     network: 'wifi'
-    ssid: 'Techspace'
-    wifiKey: 'cak-wy-rum'
+    ssid: process.env.SSID
+    wifiKey: process.env.WIFI_KEY
     appId: 9155
 
 class AutoTester extends NodeState
