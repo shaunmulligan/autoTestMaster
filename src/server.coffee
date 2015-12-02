@@ -52,13 +52,12 @@ app.get '/uuid', (req, res) ->
 
 # tests need this: jenkins will ping to check if device is online
 app.get '/ping', (req, res) ->
-  console.log "Got /ping request"
   if !fsm.current_state_name?
     mode = "free"
   else
     mode = "testing"
     state = fsm.current_state_name
-    console.log "Got /ping request, mode is "+mode
+  console.log "Got /ping request, mode is "+mode
   res.json( { resp: "ok", mode: mode, state: state, started: startTime, now: Date.now() } )
 
 # tests need this: jenkins will trigger this
