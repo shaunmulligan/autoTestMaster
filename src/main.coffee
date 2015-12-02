@@ -10,10 +10,10 @@ writer = require '../lib/writer'
 # Config Stuff
 token = process.env.TOKEN
 pathToImg = '/data/test.img'
-parameters =
+netParams =
     network: 'wifi'
-    ssid: process.env.SSID
-    wifiKey: process.env.WIFI_KEY
+    ssid: process.env.SSID || 'Techspace'
+    wifiKey: process.env.WIFI_KEY || 'cak-wy-rum'
     appId: 9155
 
 class AutoTester extends NodeState
@@ -21,7 +21,10 @@ class AutoTester extends NodeState
     Initialize:
       #Check internet and connection to api, then login to resin
       Enter: (data) ->
-        console.log '[STATE] '+fsm.current_state_name
+        fsm = this
+        #Initialise the Internet connectivity tester
+        DeviceConn.init()
+        console.log '[STATE] '+@current_state_name
         physicalMedia.allOff()
         DeviceConn.hasInternet()
           .then (isConnected) ->
@@ -41,14 +44,15 @@ class AutoTester extends NodeState
     DownloadImage:
       # Check connection to api and internet, then download .img with cli/sdk
       Enter: (data) ->
-        console.log '[STATE] '+fsm.current_state_name
+        fsm = this
+        console.log '[STATE] '+@current_state_name
         @wait 200000 # timeout if a download takes longer than 20 minutes
         resin.auth.isLoggedIn (error, isLoggedIn) ->
           if error?
             fsm.goto 'ErrorState', {error: error}
 
           if isLoggedIn
-            resin.models.os.download(parameters).then (stream) ->
+            resin.models.os.download(netParams).then (stream) ->
               console.log 'Downloading device OS'
               stream.pipe(fs.createWriteStream(pathToImg))
               stream.on 'error', (err) ->
@@ -69,7 +73,8 @@ class AutoTester extends NodeState
     MountMedia:
       # pull GPIO high so Media disk is connected to Master USB
       Enter: (data) ->
-        console.log '[STATE] '+fsm.current_state_name
+        fsm = this
+        console.log '[STATE] '+@current_state_name
         physicalMedia.allOff()
         @wait 3000 # timeout if media takes too long to mount
 
@@ -90,7 +95,8 @@ class AutoTester extends NodeState
     WriteMedia:
       # Write to install media
       Enter: (data) ->
-        console.log '[STATE] '+fsm.current_state_name
+        fsm = this
+        console.log '[STATE] '+@current_state_name
         console.log 'Writing to Install Media: '+data.drive
         writer.writeImage pathToImg, {
           device: data.drive
@@ -104,7 +110,7 @@ class AutoTester extends NodeState
     EjectMedia:
       # Pull GPIO low so Media disk is disconnected from Master USB
       Enter: (data) ->
-        console.log '[STATE] '+fsm.current_state_name
+        console.log '[STATE] '+@current_state_name
         console.log 'Ejecting install media'
         physicalMedia.allOff()
         @goto 'PlugMediaIntoSlaveDevice'
@@ -112,7 +118,7 @@ class AutoTester extends NodeState
     PlugMediaIntoSlaveDevice:
       # Pull GPIO high so Media disk is now connected to slave ready to boot
       Enter: (data) ->
-        console.log '[STATE] '+fsm.current_state_name
+        console.log '[STATE] '+@current_state_name
         console.log 'Inserting install media into device'
         physicalMedia.connectSd()
         @goto 'PowerSlaveDevice'
@@ -120,32 +126,41 @@ class AutoTester extends NodeState
     PowerSlaveDevice:
       # apply power to slave, check that power is actually on, if it is
       # then go to successful test...lots could be done here to validate
+      # jenkins should wait about 2-3 minute for device to pop up in dash
       Enter: (data) ->
-        console.log '[STATE] '+fsm.current_state_name
+        console.log '[STATE] '+@current_state_name
         physicalMedia.powerSlave()
         # TODO: need to have a GPIO input to check that power is actually there
         @goto 'TestSuccess'
 
     TestSuccess:
       Enter: (data) ->
-        console.log '[STATE] '+fsm.current_state_name
+        console.log '[STATE] '+@current_state_name
         console.log 'Successfully provisioned Slave device'
-        fsm.stop()
+        @goto 'Waiting'
+
+    Waiting:
+      #Wait for a Test to be started
+      Enter: (data) ->
+        fsm = this
+        console.log '[STATE] '+@current_state_name
+        # @stop()
 
     ErrorState:
       Enter: (data) ->
         # Should report which state had the error and what it was, then return
         # to initial state
-        console.log '[STATE] '+fsm.current_state_name
+        console.log '[STATE] '+@current_state_name
         console.log 'Error has occured: ' + data.error
-        @goto 'Initialize'
+        @goto 'Waiting'
 
 # Server Waits here for a /start request from Jenkins or pubnub
-fsm = new AutoTester
-  initial_data: {} #pass in test data here
-  initial_state: 'Initialize'
+# fsm = new AutoTester
+#   initial_data: {} #pass in test data here
+#   initial_state: 'Initialize'
 
-#Initialise the Internet connectivity tester
-DeviceConn.init()
-console.log 'Starting FSM'
-fsm.start()
+# #Initialise the Internet connectivity tester
+# DeviceConn.init()
+# console.log 'Starting FSM'
+# fsm.start()
+module.exports = AutoTester
