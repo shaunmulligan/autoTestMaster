@@ -152,6 +152,7 @@ class AutoTester extends NodeState
         # to initial state
         console.log '[STATE] '+@current_state_name
         console.log 'Error has occured: ' + data.error
+        @goto 'Waiting'
 
 # Server Waits here for a /start request from Jenkins or pubnub
 # fsm = new AutoTester
