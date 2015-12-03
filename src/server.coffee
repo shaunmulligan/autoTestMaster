@@ -57,49 +57,73 @@ app.get '/ping', (req, res) ->
   else
     mode = "testing"
     state = fsm.current_state_name
+
   console.log "Got /ping request, mode is "+mode
+
   response =
     resp: "ok"
     mode: mode
     state: state
     started: startTime
     now: Date.now()
+
   res.json response
 
 # tests need this: jenkins will trigger this
+#/start?username=unicorn-tester@resin.io&password=12345678&appId=3647&app=inuc&net=ethernet&uiHost=https://dashboard.resinstaging.io&apiHost=https://api.resinstaging.io
+
 app.get '/start', (req, res) ->
-  console.log "Got Start testing from the internet: " + req.ip
+  console.log "Got Start testing request from: " + req.ip
 
   data.appName = req.query.app
   data.img.appId = req.query.appId
   data.img.network = req.query.net
   data.img.uiHost = req.query.uiHost
   data.img.apiHost = req.query.apiHost
-
   data.credentials.username = req.query.username
   data.credentials.password = req.query.password
 
-  data.sTim = setTimeout( devTimeout, 1800000)
-  data.state = "started"
-  data.error = ""
-  data.uuid  = ""
-  data.timeout = false
+  if fsm.current_state_name != 'Waiting'
+    console.log 'Test is in progress: [STATE] = '+fsm.current_state_name
+    mode = 'testing'
+  else
+    console.log 'Starting test with default config'
+    mode = 'free'
+    startTest(data)
 
-  res.json { state: data.state , started: time, now: Date.now() }
+  response =
+    resp: "ok"
+    mode: mode
+    state: fsm.current_state_name
+    started: startTime
+    now: Date.now()
+
+  res.json response
 
 app.get '/startdefault', (req, res) ->
   if fsm.current_state_name != 'Waiting'
     console.log 'Test is in progress: [STATE] = '+fsm.current_state_name
+    mode = 'testing'
   else
     console.log 'Starting test with default config'
-    startTest()
-  res.json {resp: "ok", state: fsm.current_state_name}
+    mode = 'free'
+    startTest(data)
 
-startTest = () ->
+  response =
+    resp: "ok"
+    mode: mode
+    state: fsm.current_state_name
+    started: startTime
+    now: Date.now()
+
+  res.json response
+
+startTest = (testData) ->
   console.log 'Starting FSM'
   startTime = Date.now()
   fsm.config.initial_state = 'Initialize'
   fsm.current_state_name = 'Initialize'
+  fsm.current_data = testData
   fsm.start()
 
 console.log 'Starting Server'

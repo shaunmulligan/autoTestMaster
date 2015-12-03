@@ -30,13 +30,14 @@ class AutoTester extends NodeState
           .then (isConnected) ->
             if isConnected
               console.log 'connected to Internet'
+              #TODO: login here with stuff from data object
               #login to resin
               resin.auth.loginWithToken token, (error) ->
                 if error?
                   fsm.goto 'ErrorState' , {error: error}
                 else
                   console.log 'logged into resin.io'
-                  fsm.goto 'DownloadImage'
+                  fsm.goto 'DownloadImage', {data: data}
             else
               error = 'No Internet Connectivity'
               fsm.goto 'ErrorState' , {error: error}
@@ -52,8 +53,15 @@ class AutoTester extends NodeState
             fsm.goto 'ErrorState', {error: error}
 
           if isLoggedIn
-            resin.models.os.download(netParams).then (stream) ->
-              console.log 'Downloading device OS'
+            resin.auth.whoami()
+              .then (username) ->
+                if (!username)
+                  console.log('I\'m not logged in!')
+                else
+                  console.log('Logged in as:', username)
+
+            resin.models.os.download(data.img).then (stream) ->
+              console.log 'Downloading device OS for appID = '+data.
               stream.pipe(fs.createWriteStream(pathToImg))
               stream.on 'error', (err) ->
                 fsm.goto 'ErrorState', {error: err}
