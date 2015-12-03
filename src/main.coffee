@@ -60,9 +60,10 @@ class AutoTester extends NodeState
                 else
                   console.log('Logged in as:', username)
             params = data.img
+            console.log 'params: '+params
             resin.models.os.download(params).then (stream) ->
-              console.log 'Downloading device OS for appID = '+params.appID
               stream.pipe(fs.createWriteStream(pathToImg))
+              console.log 'Downloading device OS for appID = '+params.appID
               stream.on 'error', (err) ->
                 fsm.goto 'ErrorState', {error: err}
               stream.on 'end', ->
