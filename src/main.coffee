@@ -37,7 +37,7 @@ class AutoTester extends NodeState
                   fsm.goto 'ErrorState' , {error: error}
                 else
                   console.log 'logged into resin.io'
-                  fsm.goto 'DownloadImage', {data: data}
+                  fsm.goto 'DownloadImage', data
             else
               error = 'No Internet Connectivity'
               fsm.goto 'ErrorState' , {error: error}
