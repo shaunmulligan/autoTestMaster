@@ -26,7 +26,7 @@ data =
 
 app = express()
 fsm = new AutoTester
-  initial_data: {data} #pass in test data here
+  initial_data: data #pass in test data here
   initial_state: 'Waiting'
 
 app.get '/status', (req, res) ->
@@ -82,6 +82,8 @@ app.get '/start', (req, res) ->
   data.img.apiHost = req.query.apiHost
   data.credentials.username = req.query.username
   data.credentials.password = req.query.password
+
+  console.log 'data: '+data
 
   if fsm.current_state_name != 'Waiting'
     console.log 'Test is in progress: [STATE] = '+fsm.current_state_name
