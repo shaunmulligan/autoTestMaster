@@ -28,6 +28,7 @@ app = express()
 # fsm = new AutoTester
 #   initial_data: data #pass in test data here
 #   initial_state: 'Waiting'
+app.locals.fsm = null
 
 app.get '/status', (req, res) ->
   console.log "Got /status request"
@@ -57,7 +58,7 @@ app.get '/ping', (req, res) ->
     state = 'Waiting'
   else
     mode = "testing"
-    state = fsm.current_state_name
+    state = app.locals.fsm.current_state_name
 
   console.log "Got /ping request, mode is "+mode
 
@@ -86,8 +87,8 @@ app.get '/start', (req, res) ->
 
   console.log 'data: '+data
 
-  if fsm.current_state_name != 'Waiting'
-    console.log 'Test is in progress: [STATE] = '+fsm.current_state_name
+  if app.locals.fsm.current_state_name != 'Waiting'
+    console.log 'Test is in progress: [STATE] = '+app.locals.fsm.current_state_name
     mode = 'testing'
   else
     console.log 'Starting test with default config'
@@ -97,15 +98,15 @@ app.get '/start', (req, res) ->
   response =
     resp: "ok"
     mode: mode
-    state: fsm.current_state_name
+    state: app.locals.fsm.current_state_name
     started: startTime
     now: Date.now()
 
   res.json response
 
 app.get '/startdefault', (req, res) ->
-  if fsm.current_state_name != 'Waiting'
-    console.log 'Test is in progress: [STATE] = '+fsm.current_state_name
+  if app.locals.fsm.current_state_name != 'Waiting'
+    console.log 'Test is in progress: [STATE] = '+app.locals.fsm.current_state_name
     mode = 'testing'
   else
     console.log 'Starting test with default config'
@@ -115,7 +116,7 @@ app.get '/startdefault', (req, res) ->
   response =
     resp: "ok"
     mode: mode
-    state: fsm.current_state_name
+    state: app.locals.fsm.current_state_name
     started: startTime
     now: Date.now()
 
@@ -123,7 +124,7 @@ app.get '/startdefault', (req, res) ->
 
 startTest = (testData) ->
   console.log 'data.img: '+testData.img
-  fsm = new AutoTester
+  app.locals.fsm = new AutoTester
     initial_data: testdata #pass in test data here
     initial_state: 'Initialize'
   console.log 'Starting FSM'
@@ -131,7 +132,7 @@ startTest = (testData) ->
   # fsm.config.initial_state = 'Initialize'
   # fsm.current_state_name = 'Initialize'
   # fsm.current_data = testData
-  fsm.start()
+  app.locals.fsm.start()
 
 console.log 'Starting Server'
 app.listen(8080)
