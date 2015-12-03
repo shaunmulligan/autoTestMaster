@@ -25,9 +25,9 @@ data =
     password: process.env.USER_PASS
 
 app = express()
-fsm = new AutoTester
-  initial_data: data #pass in test data here
-  initial_state: 'Waiting'
+# fsm = new AutoTester
+#   initial_data: data #pass in test data here
+#   initial_state: 'Waiting'
 
 app.get '/status', (req, res) ->
   console.log "Got /status request"
@@ -54,6 +54,7 @@ app.get '/uuid', (req, res) ->
 app.get '/ping', (req, res) ->
   if !fsm.current_state_name?
     mode = "free"
+    state = 'Waiting'
   else
     mode = "testing"
     state = fsm.current_state_name
@@ -121,11 +122,15 @@ app.get '/startdefault', (req, res) ->
   res.json response
 
 startTest = (testData) ->
+  console.log 'data.img: '+testData.img
+  fsm = new AutoTester
+    initial_data: testdata #pass in test data here
+    initial_state: 'Initialize'
   console.log 'Starting FSM'
   startTime = Date.now()
-  fsm.config.initial_state = 'Initialize'
-  fsm.current_state_name = 'Initialize'
-  fsm.current_data = testData
+  # fsm.config.initial_state = 'Initialize'
+  # fsm.current_state_name = 'Initialize'
+  # fsm.current_data = testData
   fsm.start()
 
 console.log 'Starting Server'
