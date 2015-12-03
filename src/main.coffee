@@ -59,9 +59,9 @@ class AutoTester extends NodeState
                   console.log('I\'m not logged in!')
                 else
                   console.log('Logged in as:', username)
-
-            resin.models.os.download(data.img).then (stream) ->
-              console.log 'Downloading device OS for appID = '+data.
+            params = data.img
+            resin.models.os.download(params).then (stream) ->
+              console.log 'Downloading device OS for appID = '+params.appID
               stream.pipe(fs.createWriteStream(pathToImg))
               stream.on 'error', (err) ->
                 fsm.goto 'ErrorState', {error: err}
