@@ -58,7 +58,13 @@ app.get '/ping', (req, res) ->
     mode = "testing"
     state = fsm.current_state_name
   console.log "Got /ping request, mode is "+mode
-  res.json( { resp: "ok", mode: mode, state: state, started: startTime, now: Date.now() } )
+  response =
+    resp: "ok"
+    mode: mode
+    state: state
+    started: startTime
+    now: Date.now()
+  res.json response
 
 # tests need this: jenkins will trigger this
 app.get '/start', (req, res) ->
