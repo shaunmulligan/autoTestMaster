@@ -25,10 +25,10 @@ data =
     password: process.env.USER_PASS
 
 app = express()
-# fsm = new AutoTester
-#   initial_data: data #pass in test data here
-#   initial_state: 'Waiting'
-app.locals.fsm = null
+fsm = new AutoTester
+  initial_data: data #pass in test data here
+  initial_state: 'Waiting'
+
 
 app.get '/status', (req, res) ->
   console.log "Got /status request"
@@ -58,7 +58,7 @@ app.get '/ping', (req, res) ->
     state = 'Waiting'
   else
     mode = "testing"
-    state = app.locals.fsm.current_state_name
+    state = fsm.current_state_name
 
   console.log "Got /ping request, mode is "+mode
 
@@ -85,10 +85,10 @@ app.get '/start', (req, res) ->
   data.credentials.username = req.query.username
   data.credentials.password = req.query.password
 
-  console.log 'data: '+data
+  console.log 'data: '+data.img
 
-  if app.locals.fsm.current_state_name != 'Waiting'
-    console.log 'Test is in progress: [STATE] = '+app.locals.fsm.current_state_name
+  if fsm.current_state_name != 'Waiting'
+    console.log 'Test in progress: [STATE] = '+fsm.current_state_name
     mode = 'testing'
   else
     console.log 'Starting test with default config'
@@ -98,15 +98,15 @@ app.get '/start', (req, res) ->
   response =
     resp: "ok"
     mode: mode
-    state: app.locals.fsm.current_state_name
+    state: fsm.current_state_name
     started: startTime
     now: Date.now()
 
   res.json response
 
 app.get '/startdefault', (req, res) ->
-  if app.locals.fsm.current_state_name != 'Waiting'
-    console.log 'Test is in progress: [STATE] = '+app.locals.fsm.current_state_name
+  if fsm.current_state_name != 'Waiting'
+    console.log 'Test in progress: [STATE] = '+fsm.current_state_name
     mode = 'testing'
   else
     console.log 'Starting test with default config'
@@ -116,7 +116,7 @@ app.get '/startdefault', (req, res) ->
   response =
     resp: "ok"
     mode: mode
-    state: app.locals.fsm.current_state_name
+    state: fsm.current_state_name
     started: startTime
     now: Date.now()
 
@@ -124,15 +124,12 @@ app.get '/startdefault', (req, res) ->
 
 startTest = (testData) ->
   console.log 'data.img: '+testData.img
-  app.locals.fsm = new AutoTester
-    initial_data: testdata #pass in test data here
-    initial_state: 'Initialize'
   console.log 'Starting FSM'
   startTime = Date.now()
-  # fsm.config.initial_state = 'Initialize'
-  # fsm.current_state_name = 'Initialize'
-  # fsm.current_data = testData
-  app.locals.fsm.start()
+  fsm.config.initial_state = 'Initialize'
+  fsm.current_state_name = 'Initialize'
+  fsm.current_data = testData
+  fsm.start()
 
 console.log 'Starting Server'
 app.listen(8080)
