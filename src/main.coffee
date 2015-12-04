@@ -10,11 +10,11 @@ writer = require '../lib/writer'
 # Config Stuff
 token = process.env.TOKEN
 pathToImg = '/data/test.img'
-netParams =
-    network: 'wifi'
-    ssid: process.env.SSID || 'Techspace'
-    wifiKey: process.env.WIFI_KEY || 'cak-wy-rum'
-    appId: 9155
+# netParams =
+#     network: 'wifi'
+#     ssid: process.env.SSID || 'Techspace'
+#     wifiKey: process.env.WIFI_KEY || 'cak-wy-rum'
+#     appId: 9155
 
 class AutoTester extends NodeState
   states:
