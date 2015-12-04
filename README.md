@@ -8,4 +8,5 @@
 * make multi-device type
 * detect power connected on slave
 * switch to port 80 so can work with jenkins
+* ability to change target test env (prod or staging)
 * enable console on prod devices, so can talk to bootloader and kernel
