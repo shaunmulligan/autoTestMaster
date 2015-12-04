@@ -54,7 +54,8 @@ class AutoTester extends NodeState
                   console.log('Logged in as:', username)
             params = data.img
             console.log 'params: '+params
-            resin.models.os.download(params).then (stream) ->
+            resin.models.os.download(params)
+            .then (stream) ->
               stream.pipe(fs.createWriteStream(config.img.pathToImg))
               console.log 'Downloading device OS for appID = '+params.appId
               stream.on 'error', (err) ->
@@ -64,6 +65,8 @@ class AutoTester extends NodeState
                 fileSizeInMb = stats['size']/1000000.0
                 console.log 'download size = '+ fileSizeInMb
                 fsm.goto 'MountMedia', { fileSize: fileSizeInMb }
+            .catch (error) ->
+              fsm.goto 'ErrorState' , {error: error}
           else
             error = 'Not logged in to resin'
             fsm.goto 'ErrorState' , {error: error}

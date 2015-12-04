@@ -70,7 +70,7 @@ app.get '/start', (req, res) ->
     console.log 'Test in progress: [STATE] = '+fsm.current_state_name
     mode = 'testing'
   else
-    console.log 'Starting test with default config'
+    console.log 'Starting test'
     mode = 'free'
     startTest(config)
 
@@ -84,6 +84,7 @@ app.get '/start', (req, res) ->
   res.json response
 
 app.get '/startdefault', (req, res) ->
+  #this currently will uses the config from previous test :/
   if fsm.current_state_name != 'Waiting'
     console.log 'Test in progress: [STATE] = '+fsm.current_state_name
     mode = 'testing'
