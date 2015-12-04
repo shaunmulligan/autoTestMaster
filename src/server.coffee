@@ -26,8 +26,9 @@ data =
 
 app = express()
 fsm = new AutoTester
-  initial_data: {data} #pass in test data here
+  initial_data: data #pass in test data here
   initial_state: 'Waiting'
+
 
 app.get '/status', (req, res) ->
   console.log "Got /status request"
@@ -52,48 +53,82 @@ app.get '/uuid', (req, res) ->
 
 # tests need this: jenkins will ping to check if device is online
 app.get '/ping', (req, res) ->
-  if !fsm.current_state_name?
+  if !fsm.current_state_name? or fsm.current_state_name == 'Waiting'
     mode = "free"
+    state = 'Waiting'
   else
     mode = "testing"
     state = fsm.current_state_name
+
   console.log "Got /ping request, mode is "+mode
-  res.json( { resp: "ok", mode: mode, state: state, started: startTime, now: Date.now() } )
+
+  response =
+    resp: "ok"
+    mode: mode
+    state: state
+    started: startTime
+    now: Date.now()
+
+  res.json response
 
 # tests need this: jenkins will trigger this
+#/start?username=unicorn-tester@resin.io&password=12345678&appId=9322&app=alpine&net=ethernet&uiHost=https://dashboard.resin.io&apiHost=https://api.resin.io
+
 app.get '/start', (req, res) ->
-  console.log "Got Start testing from the internet: " + req.ip
+  console.log "Got Start testing request from: " + req.ip
 
   data.appName = req.query.app
   data.img.appId = req.query.appId
   data.img.network = req.query.net
   data.img.uiHost = req.query.uiHost
   data.img.apiHost = req.query.apiHost
-
   data.credentials.username = req.query.username
   data.credentials.password = req.query.password
 
-  data.sTim = setTimeout( devTimeout, 1800000)
-  data.state = "started"
-  data.error = ""
-  data.uuid  = ""
-  data.timeout = false
+  console.log 'data: '+data.img
 
-  res.json { state: data.state , started: time, now: Date.now() }
+  if fsm.current_state_name != 'Waiting'
+    console.log 'Test in progress: [STATE] = '+fsm.current_state_name
+    mode = 'testing'
+  else
+    console.log 'Starting test with default config'
+    mode = 'free'
+    startTest(data)
+
+  response =
+    resp: "ok"
+    mode: mode
+    state: fsm.current_state_name
+    started: startTime
+    now: Date.now()
+
+  res.json response
 
 app.get '/startdefault', (req, res) ->
   if fsm.current_state_name != 'Waiting'
-    console.log 'Test is in progress: [STATE] = '+fsm.current_state_name
+    console.log 'Test in progress: [STATE] = '+fsm.current_state_name
+    mode = 'testing'
   else
     console.log 'Starting test with default config'
-    startTest()
-  res.json {resp: "ok", state: fsm.current_state_name}
+    mode = 'free'
+    startTest(data)
 
-startTest = () ->
+  response =
+    resp: "ok"
+    mode: mode
+    state: fsm.current_state_name
+    started: startTime
+    now: Date.now()
+
+  res.json response
+
+startTest = (testData) ->
+  console.log 'data.img: '+testData.img
   console.log 'Starting FSM'
   startTime = Date.now()
   fsm.config.initial_state = 'Initialize'
   fsm.current_state_name = 'Initialize'
+  fsm.current_data = testData
   fsm.start()
 
 console.log 'Starting Server'
