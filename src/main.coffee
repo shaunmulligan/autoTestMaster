@@ -8,10 +8,6 @@ diskio = require 'diskio'
 writer = require '../lib/writer'
 config = require './config'
 
-# Config Stuff
-# token = process.env.TOKEN
-# pathToImg = '/data/test.img'
-
 class AutoTester extends NodeState
   states:
     Initialize:

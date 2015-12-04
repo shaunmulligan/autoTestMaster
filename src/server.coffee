@@ -3,27 +3,6 @@ AutoTester = require './main'
 config = require './config'
 
 startTime = 0
-# data =
-#   uuid: ""
-#   log: null
-#   state: null
-#   error: ""
-#   timeout: false
-#   states: null
-#   token: process.env.TOKEN
-#   sTim: null
-#   Utoken: process.env.TOKEN
-#   appName: process.env.SLAVEAPP || 'rpiSlave'
-#   img:
-#     appId: process.env.SLAVE_APP_ID || 9155
-#     network: "ethernet"
-#     ssid: "Techspace"
-#     wifiKey: "cak-wy-rum"
-#     uiHost: "https://dashboard.resin.io"
-#     apiHost: "https://api.resin.io"
-#   credentials:
-#     username: process.env.USERNAME
-#     password: process.env.USER_PASS
 
 app = express()
 fsm = new AutoTester

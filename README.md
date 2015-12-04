@@ -3,7 +3,6 @@
 #### TODO:
 
 * proper level logging
-* break out config into its only module
 * login with username & password (??)
 * make multi-device type
 * detect power connected on slave
