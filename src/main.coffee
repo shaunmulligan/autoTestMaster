@@ -6,15 +6,7 @@ physicalMedia = require './connectPhysical'
 DrivelistScanner = require 'drivelist-scanner'
 diskio = require 'diskio'
 writer = require '../lib/writer'
-
-# Config Stuff
-token = process.env.TOKEN
-pathToImg = '/data/test.img'
-netParams =
-    network: 'wifi'
-    ssid: process.env.SSID || 'Techspace'
-    wifiKey: process.env.WIFI_KEY || 'cak-wy-rum'
-    appId: 9155
+config = require './config'
 
 class AutoTester extends NodeState
   states:
@@ -32,7 +24,7 @@ class AutoTester extends NodeState
               console.log 'connected to Internet'
               #TODO: login here with stuff from data object
               #login to resin
-              resin.auth.loginWithToken token, (error) ->
+              resin.auth.loginWithToken config.token, (error) ->
                 if error?
                   fsm.goto 'ErrorState' , {error: error}
                 else
@@ -63,12 +55,12 @@ class AutoTester extends NodeState
             params = data.img
             console.log 'params: '+params
             resin.models.os.download(params).then (stream) ->
-              stream.pipe(fs.createWriteStream(pathToImg))
+              stream.pipe(fs.createWriteStream(config.img.pathToImg))
               console.log 'Downloading device OS for appID = '+params.appId
               stream.on 'error', (err) ->
                 fsm.goto 'ErrorState', {error: err}
               stream.on 'end', ->
-                stats = fs.statSync(pathToImg)
+                stats = fs.statSync(config.img.pathToImg)
                 fileSizeInMb = stats['size']/1000000.0
                 console.log 'download size = '+ fileSizeInMb
                 fsm.goto 'MountMedia', { fileSize: fileSizeInMb }
@@ -108,13 +100,13 @@ class AutoTester extends NodeState
         fsm = this
         console.log '[STATE] '+@current_state_name
         console.log 'Writing to Install Media: '+data.drive
-        writer.writeImage pathToImg, {
+        writer.writeImage config.img.pathToImg, {
           device: data.drive
           }, (state) ->
             console.log state.percentage
           .then ->
             console.log('Done!')
-            console.log pathToImg+' was written to '+ data.drive
+            console.log config.img.pathToImg+' was written to '+ data.drive
             fsm.goto 'EjectMedia'
 
     EjectMedia:
