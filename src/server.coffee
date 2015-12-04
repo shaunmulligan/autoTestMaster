@@ -53,7 +53,7 @@ app.get '/uuid', (req, res) ->
 
 # tests need this: jenkins will ping to check if device is online
 app.get '/ping', (req, res) ->
-  if !fsm.current_state_name?
+  if !fsm.current_state_name? or fsm.current_state_name == 'Waiting'
     mode = "free"
     state = 'Waiting'
   else
