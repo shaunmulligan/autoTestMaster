@@ -22,14 +22,13 @@ class AutoTester extends NodeState
           .then (isConnected) ->
             if isConnected
               console.log 'connected to Internet'
-              console.log 'resin creds: '+ config.credentials.email+ ' '+ config.credentials.password
               #login to resin
-              resin.auth.login config.credentials, (error) ->
-                if error?
-                  fsm.goto 'ErrorState' , {error: error}
-                else
-                  console.log 'logged into resin.io'
-                  fsm.goto 'DownloadImage', data
+              resin.auth.login(config.credentials)
+              .then ->
+                console.log 'logged as:'+config.credentials.email
+                fsm.goto 'DownloadImage', data
+              .catch (error) ->
+                fsm.goto 'ErrorState' , {error: error}
             else
               error = 'No Internet Connectivity'
               fsm.goto 'ErrorState' , {error: error}
