@@ -24,7 +24,7 @@ class AutoTester extends NodeState
               console.log 'connected to Internet'
               #TODO: login here with stuff from data object
               #login to resin
-              resin.auth.loginWithToken config.token, (error) ->
+              resin.auth.login config.credentials, (error) ->
                 if error?
                   fsm.goto 'ErrorState' , {error: error}
                 else
