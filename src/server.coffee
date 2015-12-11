@@ -9,6 +9,7 @@ fsm = new AutoTester
   initial_data: config #pass the default test config in here
   initial_state: 'Waiting'
 
+# Don't think this is used
 app.get '/status', (req, res) ->
   console.log "Got /status request"
   res.send(config.state)
@@ -28,10 +29,12 @@ app.get '/jstatus', (req, res) ->
     now: Date.now()
   res.json( resData )
 
+# Don't think this is used
 app.get '/tstatus', (req, res) ->
   console.log "Got /tstatus request"
   res.json( { timer: (config.sTim?) , timeout: config.Timeout } )
 
+# Don't think this is used
 app.get '/uuid', (req, res) ->
   console.log "Got /uuid request"
   res.json( { uuid: config.uuid } )
