@@ -152,6 +152,7 @@ class AutoTester extends NodeState
 
     ErrorState:
       Enter: (data) ->
+        #TODO: add this to config.error so that it is reflected in /jstatus
         # Should report which state had the error and what it was, then return
         # to initial state
         console.log '[STATE] '+@current_state_name
