@@ -22,7 +22,7 @@ class AutoTester extends NodeState
           .then (isConnected) ->
             if isConnected
               console.log 'connected to Internet'
-              #TODO: login here with stuff from data object
+              console.log 'resin creds: '+ config.credentials.email+ ' '+ config.credentials.password
               #login to resin
               resin.auth.login config.credentials, (error) ->
                 if error?

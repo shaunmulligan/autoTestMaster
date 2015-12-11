@@ -30,5 +30,5 @@ module.exports =
     apiHost: TEST_ENV_TARGET
     pathToImg: IMG_PATH
   credentials:
-    username: USERNAME
+    email: USERNAME
     password: USER_PASS

@@ -70,7 +70,7 @@ app.get '/start', (req, res) ->
   config.img.network = req.query.net
   config.img.uiHost = req.query.uiHost
   config.img.apiHost = req.query.apiHost
-  config.credentials.username = req.query.username
+  config.credentials.email = req.query.username
   config.credentials.password = req.query.password
 
   console.log 'config: '+config.img
