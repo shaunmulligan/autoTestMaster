@@ -1,5 +1,5 @@
 express = require 'express'
-AutoTester = require './main'
+AutoTester = require './stateMachine'
 config = require './config'
 
 startTime = 0
@@ -15,10 +15,16 @@ app.get '/status', (req, res) ->
 
 app.get '/jstatus', (req, res) ->
   console.log "Got /jstatus request"
+  if !fsm.current_state_name? or fsm.current_state_name == 'Waiting'
+    mode = "free"
+    state = 'Waiting'
+  else
+    mode = "testing"
+    state = fsm.current_state_name
   resData =
-    state: config.state
+    state: state
     error: config.error
-    started: time
+    started: startTime
     now: Date.now()
   res.json( resData )
 

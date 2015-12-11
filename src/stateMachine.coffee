@@ -159,13 +159,4 @@ class AutoTester extends NodeState
         console.log 'Error has occured: ' + data.error
         @goto 'Waiting'
 
-# Server Waits here for a /start request from Jenkins or pubnub
-# fsm = new AutoTester
-#   initial_data: {} #pass in test data here
-#   initial_state: 'Initialize'
-
-# #Initialise the Internet connectivity tester
-# DeviceConn.init()
-# console.log 'Starting FSM'
-# fsm.start()
 module.exports = AutoTester
