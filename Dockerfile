@@ -19,8 +19,8 @@ RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so
 
 #change the port of systemd-sshd to 80
 #TODO find a better way to do this.
-RUN sed -i 's/ListenStream=22/ListenStream=80/' /lib/systemd/system/ssh.socket
-RUN sed -i 's/sshd -D $SSHD_OPTS/sshd -D -p80 $SSHD_OPTS/' /lib/systemd/system/ssh.service
+# RUN sed -i 's/ListenStream=22/ListenStream=80/' /lib/systemd/system/ssh.socket
+# RUN sed -i 's/sshd -D $SSHD_OPTS/sshd -D -p80 $SSHD_OPTS/' /lib/systemd/system/ssh.service
 
 #create the ssh keys dir with correct perms
 RUN mkdir -p /root/.ssh
