@@ -121,4 +121,4 @@ startTest = (testData) ->
   fsm.start()
 
 console.log 'Starting Server'
-app.listen(8080)
+app.listen(process.env.PORT or 8080)
