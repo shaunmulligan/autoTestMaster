@@ -148,7 +148,7 @@ class AutoTester extends NodeState
 						#can also stream write progress from here
 					.then ->
 						console.log('Done!')
-						console.log config.img.pathToImg + ' was written to ' +  data.drive
+						console.log config.img.pathToImg + ' was written to ' +	data.drive
 						#emit event here: event: image-written-to-drive
 						fsm.goto 'EjectMedia'
 
@@ -174,6 +174,8 @@ class AutoTester extends NodeState
 			# then go to successful test...lots could be done here to validate
 			Enter: (data) ->
 				console.log '[STATE] ' + @current_state_name
+				#wait 30seconds for the power to be applied
+				@wait 30000
 				physicalMedia.powerSlave()
 				#emit event here: event: slave-powered-up
 				# TODO: need to have a GPIO input to check that power actually applied
@@ -186,17 +188,18 @@ class AutoTester extends NodeState
 		DeviceOnDashboard:
 			# jenkins should wait about 2-3 minute for device to pop up in dash
 			Enter: (data) ->
+				fsm = this
 				console.log '[STATE] ' + @current_state_name
-				#start a timer, timeout after 60 seconds of waiting
+				#start a timer, timeout after 4 minutes of waiting
 				@wait 240000
 
 				awaitDevice()
 				.then (uuid) ->
 					console.log 'A device just came online: ' + uuid
-					@goto 'TestSuccess'
+					fsm.goto 'TestSuccess'
 				.catch (error) ->
 					error = 'error while waiting for device on Dashboard'
-					@goto 'ErrorState', { error: error }
+					fsm.goto 'ErrorState', { error: error }
 
 			WaitTimeout: (timeout, data) ->
 				error = 'Device never showed up on dashboard'
