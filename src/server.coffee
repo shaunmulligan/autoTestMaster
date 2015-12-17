@@ -21,7 +21,7 @@ app.get '/jstatus', (req, res) ->
 		state = 'Waiting'
 	else
 		mode = 'testing'
-		state = fsm.current_state_name
+		state = config.lastState #fsm.current_state_name
 	resData =
 		state: state
 		error: config.error
