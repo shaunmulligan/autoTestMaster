@@ -63,14 +63,14 @@ class AutoTester extends NodeState
 											fsm.goto 'DownloadImage', data
 										else
 											error = 'failed to remove some devices'
-											fsm.goto 'ErrorState' , { error: error }
+											fsm.goto 'ErrorState' , { error: error, state: fsm.current_state_name }
 									.catch (error) ->
-										fsm.goto 'ErrorState' , { error: error }
+										fsm.goto 'ErrorState' , { error: error, state: fsm.current_state_name }
 							.catch (error) ->
-								fsm.goto 'ErrorState' , { error: error }
+								fsm.goto 'ErrorState' , { error: error, state: fsm.current_state_name }
 						else
 							error = 'No Internet Connectivity'
-							fsm.goto 'ErrorState' , { error: error }
+							fsm.goto 'ErrorState' , { error: error, state: fsm.current_state_name }
 
 		DownloadImage:
 			# Check connection to api and internet, then download .img with cli/sdk
@@ -81,7 +81,7 @@ class AutoTester extends NodeState
 				@wait 200000 # timeout if a download takes longer than 20 minutes
 				resin.auth.isLoggedIn (error, isLoggedIn) ->
 					if error?
-						fsm.goto 'ErrorState', { error: error }
+						fsm.goto 'ErrorState', { error: error, state: fsm.current_state_name }
 
 					if isLoggedIn
 						resin.auth.whoami()
@@ -106,14 +106,14 @@ class AutoTester extends NodeState
 								#emit event here: event: image-downloaded size: fileSizeInMb
 								fsm.goto 'MountMedia', { fileSize: fileSizeInMb }
 						.catch (error) ->
-							fsm.goto 'ErrorState' , { error: error }
+							fsm.goto 'ErrorState' , { error: error, state: fsm.current_state_name }
 					else
 						error = 'Not logged in to resin'
-						fsm.goto 'ErrorState' , { error: error }
+						fsm.goto 'ErrorState' , { error: error, state: fsm.current_state_name }
 
 				WaitTimeout: (timeout, data) ->
 					error = 'timedout while waiting for download'
-					@goto 'ErrorState', { error: error }
+					@goto 'ErrorState', { error: error, state: fsm.current_state_name }
 
 		MountMedia:
 			# pull GPIO high so Media disk is connected to Master USB
@@ -136,7 +136,7 @@ class AutoTester extends NodeState
 
 			WaitTimeout: (timeout, data) ->
 				error = 'Was unable to mount the USB media'
-				@goto 'ErrorState', { error: error }
+				@goto 'ErrorState', { error: error, state: fsm.current_state_name }
 
 		WriteMedia:
 			# Write to install media
@@ -176,6 +176,7 @@ class AutoTester extends NodeState
 			# apply power to slave, check that power is actually on, if it is
 			# then go to successful test...lots could be done here to validate
 			Enter: (data) ->
+				fsm = this
 				console.log '[STATE] ' + @current_state_name
 				#wait 30seconds for the power to be applied
 				@wait 30000
@@ -186,7 +187,7 @@ class AutoTester extends NodeState
 
 			WaitTimeout: (timeout, data) ->
 				error = 'Power was never applied'
-				@goto 'ErrorState', { error: error }
+				@goto 'ErrorState', { error: error, state: fsm.current_state_name }
 
 		DeviceOnDashboard:
 			# jenkins should wait about 2-3 minute for device to pop up in dash
@@ -202,11 +203,11 @@ class AutoTester extends NodeState
 					fsm.goto 'TestSuccess'
 				.catch (error) ->
 					error = 'error while waiting for device on Dashboard'
-					fsm.goto 'ErrorState', { error: error }
+					fsm.goto 'ErrorState', { error: error, state: fsm.current_state_name }
 
 			WaitTimeout: (timeout, data) ->
 				error = 'Device never showed up on dashboard'
-				@goto 'ErrorState', { error: error }
+				@goto 'ErrorState', { error: error, state: fsm.current_state_name }
 
 		TestSuccess:
 			Enter: (data) ->
@@ -229,7 +230,7 @@ class AutoTester extends NodeState
 				# Should report which state had the error and what it was, then return
 				# to initial state
 				console.log '[STATE] ' + @current_state_name
-				console.log 'Error has occured: ' + data.error
+				console.log 'Error occured in ' + data.state + ': ' + data.error
 				#emit event here: event: error error:data.error
 				@goto 'Waiting'
 
