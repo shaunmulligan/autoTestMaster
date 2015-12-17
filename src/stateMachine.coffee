@@ -1,6 +1,8 @@
 NodeState = require 'node-state'
 DeviceConn = require 'netcheck'
 resin = require 'resin-sdk'
+_ = require 'lodash'
+Promise = require 'bluebird'
 fs = require 'fs'
 physicalMedia = require './connectPhysical'
 DrivelistScanner = require 'drivelist-scanner'
@@ -10,6 +12,20 @@ config = require './config'
 
 removeAllDevices = (uuids) ->
   return Promise.all(uuids.map(resin.models.device.remove))
+
+awaitDevice = ->
+  poll = ->
+    resin.models.device.getAllByApplication('rpiSlave').then (devices) ->
+      if _.isEmpty(devices)
+        console.log "polling app"
+        return Promise.delay(3000).then(poll)
+      else
+        return devices[0].uuid
+    .catch (error) ->
+      console.log "error while polling for device: "+error
+      return Promise.delay(3000).then(poll)
+
+  return poll()
 
 class AutoTester extends NodeState
   states:
@@ -156,14 +172,35 @@ class AutoTester extends NodeState
     PowerSlaveDevice:
       # apply power to slave, check that power is actually on, if it is
       # then go to successful test...lots could be done here to validate
-      # jenkins should wait about 2-3 minute for device to pop up in dash
       Enter: (data) ->
         console.log '[STATE] '+@current_state_name
         physicalMedia.powerSlave()
-        # TODO: need to have a GPIO input to check that power is actually there
         #emit event here: event: slave-powered-up
-        # TODO: need to wait for device to pop up on dashboard.
-        @goto 'TestSuccess'
+        # TODO: need to have a GPIO input to check that power actually applied
+        @goto 'DeviceOnDashboard'
+
+      WaitTimeout: (timeout, data) ->
+        error = 'Power was never applied'
+        @goto 'ErrorState', {error: error}
+
+    DeviceOnDashboard:
+      # jenkins should wait about 2-3 minute for device to pop up in dash
+      Enter: (data) ->
+        console.log '[STATE] '+@current_state_name
+        #start a timer, timeout after 60 seconds of waiting
+        @wait 60000
+
+        awaitDevice()
+        .then (uuid) ->
+          console.log 'A device just came online: '+uuid
+          @goto 'TestSuccess'
+        .catch (error) ->
+          error = 'error while waiting for device on Dashboard'
+          @goto 'ErrorState', {error: error}
+
+      WaitTimeout: (timeout, data) ->
+        error = 'Device never showed up on dashboard'
+        @goto 'ErrorState', {error: error}
 
     TestSuccess:
       Enter: (data) ->

@@ -60,8 +60,6 @@ app.get '/ping', (req, res) ->
   res.json response
 
 # tests need this: jenkins will trigger this
-#/start?username=unicorn-tester@resin.io&password=12345678&appId=9322&app=alpine&net=ethernet&uiHost=https://dashboard.resin.io&apiHost=https://api.resin.io
-
 app.get '/start', (req, res) ->
   console.log "Got Start testing request from: " + req.ip
 
