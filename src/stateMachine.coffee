@@ -8,6 +8,9 @@ diskio = require 'diskio'
 writer = require '../lib/writer'
 config = require './config'
 
+removeAllDevices = (uuids) ->
+  return Promise.all(uuids.map(resin.models.device.remove))
+
 class AutoTester extends NodeState
   states:
     Initialize:
