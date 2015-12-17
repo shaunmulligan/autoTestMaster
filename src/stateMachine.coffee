@@ -26,7 +26,24 @@ class AutoTester extends NodeState
               resin.auth.login(config.credentials)
               .then ->
                 console.log 'logged as:'+config.credentials.email
-                fsm.goto 'DownloadImage', data
+                #emit event here: event: logged-in
+
+                #clean up all devices before we start
+                resin.models.device.getAllByApplication(config.appName)
+                .then (devices) ->
+                  uuids = (device.uuid for device in devices)
+                  removeAllDevices(uuids)
+                  .then (results) ->
+                    failures = (r for r in results when result isnt "OK")
+                    if failures == []
+                      error = 'failed to remove some devices'
+                      fsm.goto 'ErrorState' , {error: error}
+                    else
+                      console.log 'all devices have been removed'
+                      fsm.goto 'DownloadImage', data
+                  .catch (error) ->
+                    error = 'Was not able to remove all devices from app'
+                    fsm.goto 'ErrorState' , {error: error}
               .catch (error) ->
                 fsm.goto 'ErrorState' , {error: error}
             else
@@ -49,6 +66,7 @@ class AutoTester extends NodeState
               .then (username) ->
                 if (!username)
                   console.log('I\'m not logged in!')
+                  #need to switch to using a promise .catch here
                 else
                   console.log('Logged in as:', username)
             params = data.img
@@ -63,6 +81,7 @@ class AutoTester extends NodeState
                 stats = fs.statSync(config.img.pathToImg)
                 fileSizeInMb = stats['size']/1000000.0
                 console.log 'download size = '+ fileSizeInMb
+                #emit event here: event: image-downloaded size: fileSizeInMb
                 fsm.goto 'MountMedia', { fileSize: fileSizeInMb }
             .catch (error) ->
               fsm.goto 'ErrorState' , {error: error}
@@ -80,7 +99,7 @@ class AutoTester extends NodeState
         fsm = this
         console.log '[STATE] '+@current_state_name
         physicalMedia.allOff()
-        @wait 3000 # timeout if media takes too long to mount
+        @wait 5000 # timeout if media takes too long to mount
 
         scanner = new DrivelistScanner(interval: 1000, drives: [ ])
         physicalMedia.connectUsb()
@@ -88,6 +107,7 @@ class AutoTester extends NodeState
 
         scanner.on 'add', (drives) ->
           console.log drives
+          #emit event here: {event: mount-drive drive:drives.device}
           scanner.stop()
           fsm.unwait()
           fsm.goto 'WriteMedia', {drive: drives.device}
@@ -106,9 +126,11 @@ class AutoTester extends NodeState
           device: data.drive
           }, (state) ->
             console.log state.percentage
+            #can also stream write progress from here
           .then ->
             console.log('Done!')
             console.log config.img.pathToImg+' was written to '+ data.drive
+            #emit event here: event: image-written-to-drive
             fsm.goto 'EjectMedia'
 
     EjectMedia:
@@ -117,6 +139,7 @@ class AutoTester extends NodeState
         console.log '[STATE] '+@current_state_name
         console.log 'Ejecting install media'
         physicalMedia.allOff()
+        #emit event here: event: drive-ejected
         @goto 'PlugMediaIntoSlaveDevice'
 
     PlugMediaIntoSlaveDevice:
@@ -135,12 +158,15 @@ class AutoTester extends NodeState
         console.log '[STATE] '+@current_state_name
         physicalMedia.powerSlave()
         # TODO: need to have a GPIO input to check that power is actually there
+        #emit event here: event: slave-powered-up
+        # TODO: need to wait for device to pop up on dashboard.
         @goto 'TestSuccess'
 
     TestSuccess:
       Enter: (data) ->
         console.log '[STATE] '+@current_state_name
         console.log 'Successfully provisioned Slave device'
+        #emit event here: event: test-success
         @goto 'Waiting'
 
     Waiting:
@@ -148,6 +174,7 @@ class AutoTester extends NodeState
       Enter: (data) ->
         fsm = this
         console.log '[STATE] '+@current_state_name
+        #emit event here: event: waiting-for-test
         # @stop()
 
     ErrorState:
@@ -157,6 +184,7 @@ class AutoTester extends NodeState
         # to initial state
         console.log '[STATE] '+@current_state_name
         console.log 'Error has occured: ' + data.error
+        #emit event here: event: error error:data.error
         @goto 'Waiting'
 
 module.exports = AutoTester
