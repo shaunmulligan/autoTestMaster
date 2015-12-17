@@ -11,6 +11,8 @@ writer = require '../lib/writer'
 config = require './config'
 
 removeAllDevices = (uuids) ->
+	#TODO: rather use Promise.map([ 'a', 'b', 'c' ], resin.models.device.remove)
+	#this only resolves the promise all mapped promises resolve
 	return Promise.all(uuids.map(resin.models.device.remove))
 
 awaitDevice = ->
@@ -54,7 +56,7 @@ class AutoTester extends NodeState
 									uuids = (device.uuid for device in devices)
 									removeAllDevices(uuids)
 									.then (results) ->
-										failures = (r for r in results when result isnt 'OK')
+										failures = (result for result in results when result isnt 'OK')
 										console.log 'device remove failures:' + failures
 										if _.isEmpty(failures)
 											console.log 'all devices have been removed'
