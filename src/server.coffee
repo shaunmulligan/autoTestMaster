@@ -14,6 +14,8 @@ app.get '/jstatus', (req, res) ->
 	if !fsm.current_state_name? or fsm.current_state_name == 'Waiting'
 		mode = 'free'
 		state = 'Waiting'
+		if config.lastState == 'rpi booted'
+			state = config.lastState
 	else
 		mode = 'testing'
 		state = config.lastState #fsm.current_state_name
