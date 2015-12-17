@@ -15,7 +15,8 @@ removeAllDevices = (uuids) ->
 
 awaitDevice = ->
 	poll = ->
-		resin.models.device.getAllByApplication('rpiSlave').then (devices) ->
+		resin.models.device.getAllByApplication(config.appName)
+		.then (devices) ->
 			if _.isEmpty(devices)
 				console.log 'polling app'
 				return Promise.delay(3000).then(poll)
@@ -54,14 +55,14 @@ class AutoTester extends NodeState
 									removeAllDevices(uuids)
 									.then (results) ->
 										failures = (r for r in results when result isnt 'OK')
-										if failures == []
-											error = 'failed to remove some devices'
-											fsm.goto 'ErrorState' , { error: error }
-										else
+										console.log 'device remove failures:' + failures
+										if _.isEmpty(failures)
 											console.log 'all devices have been removed'
 											fsm.goto 'DownloadImage', data
+										else
+											error = 'failed to remove some devices'
+											fsm.goto 'ErrorState' , { error: error }
 									.catch (error) ->
-										error = 'Was not able to remove all devices from app'
 										fsm.goto 'ErrorState' , { error: error }
 							.catch (error) ->
 								fsm.goto 'ErrorState' , { error: error }
