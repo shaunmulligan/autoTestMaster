@@ -115,6 +115,7 @@ class AutoTester extends NodeState
 						fsm.goto 'ErrorState' , { error: error, state: fsm.current_state_name }
 
 				WaitTimeout: (timeout, data) ->
+					fsm = this
 					error = 'timedout while waiting for download'
 					@goto 'ErrorState', { error: error, state: fsm.current_state_name }
 
@@ -138,6 +139,7 @@ class AutoTester extends NodeState
 					fsm.goto 'WriteMedia', { drive: drives.device }
 
 			WaitTimeout: (timeout, data) ->
+				fsm = this
 				error = 'Was unable to mount the USB media'
 				@goto 'ErrorState', { error: error, state: fsm.current_state_name }
 
@@ -190,6 +192,7 @@ class AutoTester extends NodeState
 				@goto 'DeviceOnDashboard'
 
 			WaitTimeout: (timeout, data) ->
+				fsm = this
 				error = 'Power was never applied'
 				@goto 'ErrorState', { error: error, state: fsm.current_state_name }
 
@@ -211,6 +214,7 @@ class AutoTester extends NodeState
 					fsm.goto 'ErrorState', { error: error, state: fsm.current_state_name }
 
 			WaitTimeout: (timeout, data) ->
+				fsm = this
 				error = 'Device never showed up on dashboard'
 				@goto 'ErrorState', { error: error, state: fsm.current_state_name }
 
