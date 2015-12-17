@@ -10,6 +10,7 @@ diskio = require 'diskio'
 writer = require '../lib/writer'
 config = require './config'
 
+#probably should break these out into a utils module
 removeAllDevices = (uuids) ->
 	#TODO: rather use Promise.map([ 'a', 'b', 'c' ], resin.models.device.remove)
 	#this only resolves the promise all mapped promises resolve
