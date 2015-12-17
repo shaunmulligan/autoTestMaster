@@ -76,15 +76,18 @@ app.get '/start', (req, res) ->
 	if fsm.current_state_name != 'Waiting'
 		console.log 'Test in progress: [STATE] = ' + fsm.current_state_name
 		mode = 'testing'
+		state = config.lastState #fsm.current_state_name
 	else
 		console.log 'Starting test'
 		mode = 'free'
+		state = 'started'
+		config.lastState = 'started'
 		startTest(config)
 
 	response =
 		resp: 'ok'
 		mode: mode
-		state: fsm.current_state_name
+		state: state
 		started: startTime
 		now: Date.now()
 

@@ -50,7 +50,7 @@ class AutoTester extends NodeState
 							.then ->
 								console.log 'logged as:' + config.credentials.email
 								#emit event here: event: logged-in
-
+								config.lastState = 'logged in'
 								#clean up all devices before we start
 								resin.models.device.getAllByApplication(config.appName)
 								.then (devices) ->
@@ -61,6 +61,7 @@ class AutoTester extends NodeState
 										console.log 'device remove failures:' + failures
 										if _.isEmpty(failures)
 											console.log 'all devices have been removed'
+											config.lastState = 'app is clear of devices'
 											fsm.goto 'DownloadImage', data
 										else
 											error = 'failed to remove some devices'
@@ -104,6 +105,7 @@ class AutoTester extends NodeState
 								stats = fs.statSync(config.img.pathToImg)
 								fileSizeInMb = stats['size'] / 1000000.0
 								console.log 'download size = ' + fileSizeInMb
+								config.lastState = 'image was downloaded'
 								#emit event here: event: image-downloaded size: fileSizeInMb
 								fsm.goto 'MountMedia', { fileSize: fileSizeInMb }
 						.catch (error) ->
@@ -153,6 +155,7 @@ class AutoTester extends NodeState
 					.then ->
 						console.log('Done!')
 						console.log config.img.pathToImg + ' was written to ' +	data.drive
+						config.lastState = 'image was written'
 						#emit event here: event: image-written-to-drive
 						fsm.goto 'EjectMedia'
 
@@ -201,6 +204,7 @@ class AutoTester extends NodeState
 				awaitDevice()
 				.then (uuid) ->
 					console.log 'A device just came online: ' + uuid
+					config.lastState = 'rpi booted'
 					fsm.goto 'TestSuccess'
 				.catch (error) ->
 					error = 'error while waiting for device on Dashboard'
@@ -232,6 +236,7 @@ class AutoTester extends NodeState
 				# to initial state
 				console.log '[STATE] ' + @current_state_name
 				console.log 'Error occured in ' + data.state + ': ' + data.error
+				config.lastState = 'testing finished with error'
 				#emit event here: event: error error:data.error
 				@goto 'Waiting'
 
