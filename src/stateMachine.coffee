@@ -160,6 +160,9 @@ class AutoTester extends NodeState
 						config.lastState = 'image was written'
 						#emit event here: event: image-written-to-drive
 						fsm.goto 'EjectMedia'
+					.catch (error) ->
+						error = 'Not logged in to resin'
+						fsm.goto 'ErrorState' , { error: error, state: fsm.current_state_name }
 
 		EjectMedia:
 			# Pull GPIO low so Media disk is disconnected from Master USB
