@@ -18,6 +18,11 @@ removeAllDevices = (uuids) ->
 
 awaitDevice = ->
 	poll = ->
+		setTimeout ->
+			error = 'timedout while waiting for device to show on dashboard'
+			return Promise.reject(error)
+		, 24000
+
 		resin.models.device.getAllByApplication(config.appName)
 		.then (devices) ->
 			if _.isEmpty(devices)
@@ -26,7 +31,7 @@ awaitDevice = ->
 			else
 				return devices[0].uuid
 		.catch (error) ->
-			console.log 'error while polling for device: ' + error
+			console.log 'error while polling for device: ' + error + ' . Trying again'
 			return Promise.delay(3000).then(poll)
 
 	return poll()
@@ -204,7 +209,7 @@ class AutoTester extends NodeState
 				fsm = this
 				console.log '[STATE] ' + @current_state_name
 				#start a timer, timeout after 4 minutes of waiting
-				@wait 240000
+				# @wait 240000
 
 				awaitDevice()
 				.then (uuid) ->
@@ -212,7 +217,6 @@ class AutoTester extends NodeState
 					config.lastState = 'rpi booted'
 					fsm.goto 'TestSuccess'
 				.catch (error) ->
-					error = 'error while waiting for device on Dashboard'
 					fsm.goto 'ErrorState', { error: error, state: fsm.current_state_name }
 
 			WaitTimeout: (timeout, data) ->
