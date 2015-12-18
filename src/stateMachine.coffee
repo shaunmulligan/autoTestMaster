@@ -34,7 +34,7 @@ awaitDevice = ->
 			console.log 'error while polling for device: ' + error + ' . Trying again'
 			return Promise.delay(3000).then(poll)
 
-	return poll()
+	poll().return()
 
 class AutoTester extends NodeState
 	states:
