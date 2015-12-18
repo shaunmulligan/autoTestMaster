@@ -20,7 +20,7 @@ awaitDevice = ->
 	poll = ->
 		setTimeout ->
 			error = 'timedout while waiting for device to show on dashboard'
-			return error
+			poll().reject(error)
 		, 24000
 
 		resin.models.device.getAllByApplication(config.appName)
@@ -32,9 +32,9 @@ awaitDevice = ->
 				return devices[0].uuid
 		.catch (error) ->
 			console.log 'error while polling for device: ' + error + ' . Trying again'
-			return Promise.delay(3000).then(poll)
+			return error
 
-	poll().return()
+	poll().return(devices[0].uuid)
 
 class AutoTester extends NodeState
 	states:
@@ -98,7 +98,7 @@ class AutoTester extends NodeState
 								else
 									console.log('Logged in as:', username)
 						params = data.img
-						console.log 'params: ' + params.network + ',' + params.ssid
+						console.log 'params: ' + params.network + ',' + params.ssid + '' + params.wifiKey
 						resin.models.os.download(params)
 						.then (stream) ->
 							stream.pipe(fs.createWriteStream(config.img.pathToImg))
