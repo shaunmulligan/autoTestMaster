@@ -90,15 +90,15 @@ class AutoTester extends NodeState
 						fsm.goto 'ErrorState', { error: error, state: fsm.current_state_name }
 
 					if isLoggedIn
-						resin.auth.whoami()
-							.then (username) ->
-								if (!username)
-									console.log('I\'m not logged in!')
-									#need to switch to using a promise .catch here
-								else
-									console.log('Logged in as:', username)
+						# resin.auth.whoami()
+						# 	.then (username) ->
+						# 		if (!username)
+						# 			console.log('I\'m not logged in!')
+						# 			#need to switch to using a promise .catch here
+						# 		else
+						# 			console.log('Logged in as:', username)
 						params = data.img
-						console.log 'params: ' + params.network + ',' + params.ssid + '' + params.wifiKey
+						console.log 'params= ' + JSON.stringify(params, null, 4)
 						resin.models.os.download(params)
 						.then (stream) ->
 							stream.pipe(fs.createWriteStream(config.img.pathToImg))
