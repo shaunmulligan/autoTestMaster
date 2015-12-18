@@ -20,7 +20,7 @@ awaitDevice = ->
 	poll = ->
 		setTimeout ->
 			error = 'timedout while waiting for device to show on dashboard'
-			return Promise.reject(error)
+			return error
 		, 24000
 
 		resin.models.device.getAllByApplication(config.appName)
