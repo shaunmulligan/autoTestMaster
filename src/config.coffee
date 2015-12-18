@@ -26,7 +26,7 @@ module.exports =
 	img:
 		appId: SLAVE_APP_ID
 		network: 'ethernet'
-		ssid: SSID
+		wifiSsid: SSID
 		wifiKey: WIFI_PASS
 		uiHost: ''
 		apiHost: TEST_ENV_TARGET
