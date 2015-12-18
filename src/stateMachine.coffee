@@ -84,7 +84,6 @@ class AutoTester extends NodeState
 			Enter: (data) ->
 				fsm = this
 				console.log '[STATE] ' + @current_state_name
-				console.log 'data: ' + data.img
 				@wait 200000 # timeout if a download takes longer than 20 minutes
 				resin.auth.isLoggedIn (error, isLoggedIn) ->
 					if error?
@@ -99,7 +98,7 @@ class AutoTester extends NodeState
 								else
 									console.log('Logged in as:', username)
 						params = data.img
-						console.log 'params: ' + params
+						console.log 'params: ' + params.network + ',' + params.ssid
 						resin.models.os.download(params)
 						.then (stream) ->
 							stream.pipe(fs.createWriteStream(config.img.pathToImg))
