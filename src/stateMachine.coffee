@@ -161,7 +161,6 @@ class AutoTester extends NodeState
 						#emit event here: event: image-written-to-drive
 						fsm.goto 'EjectMedia'
 					.catch (error) ->
-						error = 'Not logged in to resin'
 						fsm.goto 'ErrorState' , { error: error, state: fsm.current_state_name }
 
 		EjectMedia:
