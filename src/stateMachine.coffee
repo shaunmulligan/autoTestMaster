@@ -16,25 +16,17 @@ removeAllDevices = (uuids) ->
 	#this only resolves the promise all mapped promises resolve
 	return Promise.all(uuids.map(resin.models.device.remove))
 
-awaitDevice = ->
-	poll = ->
-		setTimeout ->
-			error = 'timedout while waiting for device to show on dashboard'
-			poll().reject(error)
-		, 24000
+shouldPoll = true
 
-		resin.models.device.getAllByApplication(config.appName)
-		.then (devices) ->
-			if _.isEmpty(devices)
-				console.log 'polling app'
-				return Promise.delay(3000).then(poll)
-			else
-				return devices[0].uuid
-		.catch (error) ->
-			console.log 'error while polling for device: ' + error + ' . Trying again'
-			return error
-
-	poll().return(devices[0].uuid)
+poll = ->
+	return resin.models.device.getAllByApplication('alpine')
+	.then (devices) ->
+		if !_.isEmpty(devices)
+			return devices[0]?.uuid
+		if shouldPoll
+			console.log 'polling...'
+			Promise.delay(1000).then(poll)
+	.cancellable()
 
 class AutoTester extends NodeState
 	states:
@@ -210,11 +202,13 @@ class AutoTester extends NodeState
 				#start a timer, timeout after 4 minutes of waiting
 				# @wait 240000
 
-				awaitDevice()
-				.then (uuid) ->
-					console.log 'A device just came online: ' + uuid
+				poll().timeout(240000).then (uuid) ->
+					console.log 'A device was found: ' + uuid
 					config.lastState = 'rpi booted'
 					fsm.goto 'TestSuccess'
+				.catch Promise.TimeoutError, (error) ->
+					shouldPoll = false
+					fsm.goto 'ErrorState', { error: error, state: fsm.current_state_name }
 				.catch (error) ->
 					fsm.goto 'ErrorState', { error: error, state: fsm.current_state_name }
 
