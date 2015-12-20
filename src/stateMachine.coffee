@@ -25,7 +25,7 @@ poll = ->
 			return devices[0]?.uuid
 		if shouldPoll
 			console.log 'polling...'
-			Promise.delay(1000).then(poll)
+			Promise.delay(3000).then(poll)
 	.cancellable()
 
 class AutoTester extends NodeState
@@ -49,6 +49,7 @@ class AutoTester extends NodeState
 								#emit event here: event: logged-in
 								config.lastState = 'logged in'
 								#clean up all devices before we start
+								# TODO: check that application exists:
 								resin.models.device.getAllByApplication(config.appName)
 								.then (devices) ->
 									uuids = (device.uuid for device in devices)

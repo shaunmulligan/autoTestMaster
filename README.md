@@ -8,4 +8,5 @@
 * switch to promise based GPIO: https://github.com/k2wanko/node-pi-gpio
 * need to check that download size is sane
 * ability to change target test env (prod or staging)
-* enable console on prod devices, so can talk to bootloader and kernel
+	* set RESINRC_BASE_URL to resin.io or resinstaging.io
+* enable console on prod devices, so can talk to bootloader, kernel and HostOS
