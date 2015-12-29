@@ -122,7 +122,7 @@ class AutoTester extends NodeState
 				fsm = this
 				console.log '[STATE] ' + @current_state_name
 				physicalMedia.allOff()
-				@wait 5000 # timeout if media takes too long to mount
+				@wait 10000 # timeout if media takes too long to mount
 
 				scanner = new DrivelistScanner(interval: 1000, drives: [ ])
 				physicalMedia.connectUsb()
