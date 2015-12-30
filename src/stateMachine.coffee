@@ -137,7 +137,7 @@ class AutoTester extends NodeState
 
 			WaitTimeout: (timeout, data) ->
 				fsm = this
-				error = 'Was unable to mount the USB media'
+				error = 'timeout reached, unable to mount the USB media'
 				@goto 'ErrorState', { error: error, state: fsm.current_state_name }
 
 		WriteMedia:
