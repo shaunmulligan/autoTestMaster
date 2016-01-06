@@ -222,6 +222,7 @@ class AutoTester extends NodeState
 			Enter: (data) ->
 				console.log '[STATE] ' + @current_state_name
 				console.log 'Successfully provisioned Slave device'
+				config.lastState = 'testing finished'
 				#emit event here: event: test-success
 				@goto 'Waiting'
 
@@ -241,6 +242,7 @@ class AutoTester extends NodeState
 				console.log '[STATE] ' + @current_state_name
 				console.log 'Error occured in ' + data.state + ': ' + data.error
 				config.lastState = 'testing finished with error'
+				config.error = data.error
 				#emit event here: event: error error:data.error
 				@goto 'Waiting'
 

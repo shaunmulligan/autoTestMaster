@@ -16,6 +16,8 @@ app.get '/jstatus', (req, res) ->
 		state = 'Waiting'
 		if config.lastState == 'rpi booted'
 			state = config.lastState
+		if config.lastState == 'testing finished with error'
+			state = config.lastState
 	else
 		mode = 'testing'
 		state = config.lastState #fsm.current_state_name
