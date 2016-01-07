@@ -10,7 +10,7 @@ diskio = require 'diskio'
 writer = require '../lib/writer'
 config = require './config'
 
-expectedImgSize = 1.4
+expectedImgSize = 1400.0
 
 #probably should break these out into a utils module
 removeAllDevices = (uuids) ->
