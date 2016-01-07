@@ -10,6 +10,8 @@ diskio = require 'diskio'
 writer = require '../lib/writer'
 config = require './config'
 
+expectedImgSize = 1.4
+
 #probably should break these out into a utils module
 removeAllDevices = (uuids) ->
 	#TODO: rather use Promise.map([ 'a', 'b', 'c' ], resin.models.device.remove)
@@ -77,19 +79,12 @@ class AutoTester extends NodeState
 			Enter: (data) ->
 				fsm = this
 				console.log '[STATE] ' + @current_state_name
-				@wait 200000 # timeout if a download takes longer than 20 minutes
+				@wait 10 * 60 * 1000 # timeout if a download takes longer than 10 minutes
 				resin.auth.isLoggedIn (error, isLoggedIn) ->
 					if error?
 						fsm.goto 'ErrorState', { error: error, state: fsm.current_state_name }
 
 					if isLoggedIn
-						# resin.auth.whoami()
-						# 	.then (username) ->
-						# 		if (!username)
-						# 			console.log('I\'m not logged in!')
-						# 			#need to switch to using a promise .catch here
-						# 		else
-						# 			console.log('Logged in as:', username)
 						params = data.img
 						console.log 'params= ' + JSON.stringify(params, null, 4)
 						resin.models.os.download(params)
@@ -104,7 +99,11 @@ class AutoTester extends NodeState
 								console.log 'download size = ' + fileSizeInMb
 								config.lastState = 'image was downloaded'
 								#emit event here: event: image-downloaded size: fileSizeInMb
-								fsm.goto 'MountMedia', { fileSize: fileSizeInMb }
+								if fileSizeInMb < expectedImgSize
+									error = 'download is too small, something went wrong!'
+									fsm.goto 'ErrorState' , { error: error, state: fsm.current_state_name }
+								else
+									fsm.goto 'MountMedia', { fileSize: fileSizeInMb }
 						.catch (error) ->
 							fsm.goto 'ErrorState' , { error: error, state: fsm.current_state_name }
 					else
