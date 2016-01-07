@@ -79,7 +79,7 @@ class AutoTester extends NodeState
 			Enter: (data) ->
 				fsm = this
 				console.log '[STATE] ' + @current_state_name
-				@wait 10 * 60 * 1000 # timeout if a download takes longer than 10 minutes
+				@wait 30 * 60 * 1000 # timeout if a download takes longer than 30 minutes
 				resin.auth.isLoggedIn (error, isLoggedIn) ->
 					if error?
 						fsm.goto 'ErrorState', { error: error, state: fsm.current_state_name }
