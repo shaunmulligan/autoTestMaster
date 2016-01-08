@@ -4,7 +4,23 @@ config = require './config'
 bunyan = require('bunyan')
 
 logLevel = process.env.LOG_LEVEL or 'info'
-log = bunyan.createLogger { name: 'stateMachine', level: logLevel }
+logSettings =
+	name: 'server'
+	level: logLevel
+	streams: [
+		{
+        type: 'rotating-file',
+        path: '/data/server.log',
+        period: '1d',   # daily rotation
+        count: 3,       # keep 3 back copies
+				level: 'debug'
+    },
+		{
+			level: logLevel,
+			stream: process.stdout
+		}
+	]
+log = bunyan.createLogger logSettings
 
 startTime = 0
 

@@ -12,7 +12,23 @@ config = require './config'
 bunyan = require('bunyan')
 
 logLevel = process.env.LOG_LEVEL or 'info'
-log = bunyan.createLogger { name: 'stateMachine', level: logLevel }
+logSettings =
+	name: 'stateMachine'
+	level: logLevel
+	streams: [
+		{
+        type: 'rotating-file',
+        path: '/data/stateMachine.log',
+        period: '1d',   # daily rotation
+        count: 3,       # keep 3 back copies
+				level: 'debug'
+    },
+		{
+			level: logLevel,
+			stream: process.stdout
+		}
+	]
+log = bunyan.createLogger logSettings
 
 expectedImgSize = 1400.0
 
@@ -152,7 +168,7 @@ class AutoTester extends NodeState
 				writer.writeImage config.img.pathToImg, {
 					device: data.drive
 					}, (state) ->
-						log.debug state.percentage
+						log.debug { percentage_written: state.percentage }
 						#can also stream write progress from here
 					.then ->
 						log.info('Done!')
