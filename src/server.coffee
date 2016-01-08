@@ -3,7 +3,8 @@ AutoTester = require './stateMachine'
 config = require './config'
 bunyan = require('bunyan')
 
-log = bunyan.createLogger { name: 'server', level: 'debug' }
+logLevel = process.env.LOG_LEVEL or 'info'
+log = bunyan.createLogger { name: 'stateMachine', level: logLevel }
 
 startTime = 0
 
@@ -63,7 +64,7 @@ app.get '/start', (req, res) ->
 	config.credentials.email = req.query.username
 	config.credentials.password = req.query.password
 
-	log.debug 'config: ' + config.img
+	log.debug { config: config.img }
 
 	if fsm.current_state_name != 'Waiting'
 		log.info 'Test in progress: [STATE] = ' + fsm.current_state_name
@@ -86,7 +87,7 @@ app.get '/start', (req, res) ->
 	res.json response
 
 startTest = (testData) ->
-	log.debug 'data.img: ' + testData.img
+	log.debug { img: testData.img }
 	log.info 'Starting State Machine'
 	startTime = Date.now()
 	fsm.config.initial_state = 'Initialize'

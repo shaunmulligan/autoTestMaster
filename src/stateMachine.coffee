@@ -11,7 +11,8 @@ writer = require '../lib/writer'
 config = require './config'
 bunyan = require('bunyan')
 
-log = bunyan.createLogger { name: 'stateMachine', level: 'debug' }
+logLevel = process.env.LOG_LEVEL or 'info'
+log = bunyan.createLogger { name: 'stateMachine', level: logLevel }
 
 expectedImgSize = 1400.0
 
@@ -61,9 +62,9 @@ class AutoTester extends NodeState
 									removeAllDevices(uuids)
 									.then (results) ->
 										failures = (result for result in results when result isnt 'OK')
-										log.info 'device remove failures:' + failures
+										log.debug 'device remove failures:' + failures
 										if _.isEmpty(failures)
-											log.info 'all devices have been removed'
+											log.info 'all devices have been removed from app'
 											config.lastState = 'app is clear of devices'
 											fsm.goto 'DownloadImage', data
 										else
@@ -89,7 +90,7 @@ class AutoTester extends NodeState
 
 					if isLoggedIn
 						params = data.img
-						log.info 'params= ' + JSON.stringify(params, null, 4)
+						log.debug { params: params }
 						resin.models.os.download(params)
 						.then (stream) ->
 							stream.pipe(fs.createWriteStream(config.img.pathToImg))
