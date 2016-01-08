@@ -34,4 +34,4 @@ if [ "$INITSYSTEM" != "on" ]; then
   /usr/sbin/sshd -p 80 &
 fi
 
-coffee /usr/src/app/src/server.coffee
+coffee /usr/src/app/src/server.coffee | /usr/src/app/node_modules/bunyan/bin/bunyan
