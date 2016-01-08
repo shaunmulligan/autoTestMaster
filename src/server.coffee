@@ -1,6 +1,9 @@
 express = require 'express'
 AutoTester = require './stateMachine'
 config = require './config'
+bunyan = require('bunyan')
+
+log = bunyan.createLogger { name: 'server', level: 'debug' }
 
 startTime = 0
 
@@ -10,7 +13,7 @@ fsm = new AutoTester
 	initial_state: 'Waiting'
 
 app.get '/jstatus', (req, res) ->
-	console.log 'Got /jstatus request'
+	log.info 'Got /jstatus request'
 	if !fsm.current_state_name? or fsm.current_state_name == 'Waiting'
 		mode = 'free'
 		state = 'Waiting'
@@ -37,7 +40,7 @@ app.get '/ping', (req, res) ->
 		mode = 'testing'
 		state = fsm.current_state_name
 
-	console.log 'Got /ping request, mode is ' + mode
+	log.info 'Got /ping request, mode is ' + mode
 
 	response =
 		resp: 'ok'
@@ -50,7 +53,7 @@ app.get '/ping', (req, res) ->
 
 # tests need this: jenkins will trigger this
 app.get '/start', (req, res) ->
-	console.log 'Got Start testing request from: '  +  req.ip
+	log.info 'Got Start testing request from: '  +  req.ip
 
 	config.appName = req.query.app
 	config.img.appId = req.query.appId
@@ -60,14 +63,14 @@ app.get '/start', (req, res) ->
 	config.credentials.email = req.query.username
 	config.credentials.password = req.query.password
 
-	console.log 'config: ' + config.img
+	log.debug 'config: ' + config.img
 
 	if fsm.current_state_name != 'Waiting'
-		console.log 'Test in progress: [STATE] = ' + fsm.current_state_name
+		log.info 'Test in progress: [STATE] = ' + fsm.current_state_name
 		mode = 'testing'
 		state = config.lastState #fsm.current_state_name
 	else
-		console.log 'Starting test'
+		log.info 'Starting test'
 		mode = 'free'
 		state = 'started'
 		config.lastState = 'started'
@@ -83,13 +86,13 @@ app.get '/start', (req, res) ->
 	res.json response
 
 startTest = (testData) ->
-	console.log 'data.img: ' + testData.img
-	console.log 'Starting FSM'
+	log.debug 'data.img: ' + testData.img
+	log.info 'Starting State Machine'
 	startTime = Date.now()
 	fsm.config.initial_state = 'Initialize'
 	fsm.current_state_name = 'Initialize'
 	fsm.current_data = testData
 	fsm.start()
 
-console.log 'Starting Server'
+log.info 'Starting Server'
 app.listen(process.env.PORT or 8080)
