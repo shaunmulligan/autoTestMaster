@@ -41,7 +41,7 @@ removeAllDevices = (uuids) ->
 shouldPoll = true
 
 poll = ->
-	return resin.models.device.getAllByApplication('alpine')
+	return resin.models.device.getAllByApplication(config.appName)
 	.then (devices) ->
 		if !_.isEmpty(devices)
 			return devices[0]?.uuid
