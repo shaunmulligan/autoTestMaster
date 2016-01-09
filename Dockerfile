@@ -33,6 +33,7 @@ RUN chmod 700  /root/.ssh
 
 #Enable systemd init system in the container
 ENV INITSYSTEM on
+ENV VERSION 2
 RUN npm install -g coffee-script
 RUN mkdir -p /usr/src/app && ln -s /usr/src/app /app
 WORKDIR /usr/src/app
