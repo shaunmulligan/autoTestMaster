@@ -99,7 +99,7 @@ class AutoTester extends NodeState
 			Enter: (data) ->
 				fsm = this
 				log.info '[STATE] ' + @current_state_name
-				@wait 30 * 60 * 1000 # timeout if a download takes longer than 30 minutes
+				@wait 10 * 60 * 1000 # timeout if a download takes longer than 30 minutes
 				resin.auth.isLoggedIn (error, isLoggedIn) ->
 					if error?
 						fsm.goto 'ErrorState', { error: error, state: fsm.current_state_name }
@@ -241,7 +241,7 @@ class AutoTester extends NodeState
 				fsm = this
 				log.info '[STATE] ' + @current_state_name
 				log.info 'Successfully provisioned Slave device'
-				@wait 2 * 60 * 1000 #wait 2 minutes after success
+				@wait 60000 #wait 1 minutes after success
 
 				WaitTimeout: (timeout, data) ->
 					config.lastState = 'testing finished'
