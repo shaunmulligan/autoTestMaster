@@ -221,7 +221,6 @@ class AutoTester extends NodeState
 				log.info '[STATE] ' + @current_state_name
 				#start a timer, timeout after 4 minutes of waiting
 				# @wait 240000
-
 				poll().timeout(240000).then (uuid) ->
 					log.info 'A device was found: ' + uuid
 					config.lastState = 'rpi booted'
@@ -239,6 +238,7 @@ class AutoTester extends NodeState
 
 		TestSuccess:
 			Enter: (data) ->
+        fsm = this
 				log.info '[STATE] ' + @current_state_name
 				log.info 'Successfully provisioned Slave device'
 				@wait 2 * 60 * 1000 #wait 2 minutes after success
@@ -246,7 +246,8 @@ class AutoTester extends NodeState
 				WaitTimeout: (timeout, data) ->
 					config.lastState = 'testing finished'
 					#emit event here: event: test-success
-					@goto 'Waiting'
+          log.debug 'waiting a bit to confirm success'
+					fsm.goto 'Waiting'
 
 		Waiting:
 			#Wait for a Test to be started
