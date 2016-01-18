@@ -241,9 +241,12 @@ class AutoTester extends NodeState
 			Enter: (data) ->
 				log.info '[STATE] ' + @current_state_name
 				log.info 'Successfully provisioned Slave device'
-				config.lastState = 'testing finished'
-				#emit event here: event: test-success
-				@goto 'Waiting'
+				@wait 2 * 60 * 1000 #wait 2 minutes after success
+
+				WaitTimeout: (timeout, data) ->
+					config.lastState = 'testing finished'
+					#emit event here: event: test-success
+					@goto 'Waiting'
 
 		Waiting:
 			#Wait for a Test to be started
