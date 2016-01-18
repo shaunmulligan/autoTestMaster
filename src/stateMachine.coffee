@@ -17,12 +17,12 @@ logSettings =
 	level: logLevel
 	streams: [
 		{
-        type: 'rotating-file',
-        path: '/data/stateMachine.log',
-        period: '1d',   # daily rotation
-        count: 3,       # keep 3 back copies
+				type: 'rotating-file',
+				path: '/data/stateMachine.log',
+				period: '1d',	 # daily rotation
+				count: 3,			 # keep 3 back copies
 				level: 'debug'
-    },
+		},
 		{
 			level: logLevel,
 			stream: process.stdout
@@ -238,7 +238,7 @@ class AutoTester extends NodeState
 
 		TestSuccess:
 			Enter: (data) ->
-        fsm = this
+				fsm = this
 				log.info '[STATE] ' + @current_state_name
 				log.info 'Successfully provisioned Slave device'
 				@wait 2 * 60 * 1000 #wait 2 minutes after success
@@ -246,7 +246,7 @@ class AutoTester extends NodeState
 				WaitTimeout: (timeout, data) ->
 					config.lastState = 'testing finished'
 					#emit event here: event: test-success
-          log.debug 'waiting a bit to confirm success'
+					log.debug 'waiting a bit to confirm success'
 					fsm.goto 'Waiting'
 
 		Waiting:
