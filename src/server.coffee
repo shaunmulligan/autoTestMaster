@@ -1,7 +1,7 @@
 express = require 'express'
 AutoTester = require './stateMachine'
 config = require './config'
-bunyan = require('bunyan')
+bunyan = require 'bunyan'
 
 logLevel = process.env.LOG_LEVEL or 'info'
 logSettings =

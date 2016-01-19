@@ -9,7 +9,7 @@ DrivelistScanner = require 'drivelist-scanner'
 diskio = require 'diskio'
 writer = require '../lib/writer'
 config = require './config'
-bunyan = require('bunyan')
+bunyan = require 'bunyan'
 
 logLevel = process.env.LOG_LEVEL or 'info'
 logSettings =
@@ -220,7 +220,7 @@ class AutoTester extends NodeState
 				fsm = this
 				log.info '[STATE] ' + @current_state_name
 				#start a timer, timeout after 4 minutes of waiting
-				# @wait 240000
+
 				poll().timeout(240000).then (uuid) ->
 					log.info 'A device was found: ' + uuid
 					config.lastEvent = 'rpi booted'
@@ -241,13 +241,7 @@ class AutoTester extends NodeState
 				fsm = this
 				log.info '[STATE] ' + @current_state_name
 				log.info 'Successfully provisioned Slave device'
-				@wait 60000 #wait 1 minutes after success
-
-				WaitTimeout: (timeout, data) ->
-					config.lastEvent = 'testing finished'
-					#emit event here: event: test-success
-					log.debug 'waiting a bit to confirm success'
-					fsm.goto 'Waiting'
+				@goto 'Waiting'
 
 		Waiting:
 			#Wait for a Test to be started
