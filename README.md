@@ -2,11 +2,9 @@
 
 #### TODO:
 
-* proper level logging
-* login with username & password (??)
 * make multi-device type
 * detect power connected on slave
-* need to check that download size is sane
-* switch to port 80 so can work with jenkins
+* switch to promise based GPIO: https://github.com/k2wanko/node-pi-gpio
 * ability to change target test env (prod or staging)
-* enable console on prod devices, so can talk to bootloader and kernel
+	* set RESINRC_BASE_URL to resin.io or resinstaging.io
+* enable console on prod devices, so can talk to bootloader, kernel and HostOS
