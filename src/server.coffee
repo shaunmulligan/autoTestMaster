@@ -9,12 +9,12 @@ logSettings =
 	level: logLevel
 	streams: [
 		{
-        type: 'rotating-file',
-        path: '/data/server.log',
-        period: '1d',   # daily rotation
-        count: 3,       # keep 3 back copies
+				type: 'rotating-file',
+				path: '/data/server.log',
+				period: '1d',	 # daily rotation
+				count: 3,			 # keep 3 back copies
 				level: 'debug'
-    },
+		},
 		{
 			level: logLevel,
 			stream: process.stdout
@@ -31,22 +31,27 @@ fsm = new AutoTester
 
 app.get '/jstatus', (req, res) ->
 	log.info 'Got /jstatus request'
+	log.debug 'fsm.current_state_name: ' + fsm.current_state_name
+	log.debug 'config.lastEvent: ' + config.lastEvent
+	#if we dont have a FSM or we are waiting
 	if !fsm.current_state_name? or fsm.current_state_name == 'Waiting'
 		mode = 'free'
 		state = 'Waiting'
 		if config.lastEvent == 'rpi booted'
 			state = config.lastEvent
-		if config.lastEvent == 'testing finished with error'
+		else if config.lastEvent == 'testing finished with error'
 			state = config.lastEvent
 	else
 		mode = 'testing'
 		state = config.lastEvent #fsm.current_state_name
 
-  resData =
+	resData =
 		state: state
 		error: config.error
 		started: startTime
 		now: Date.now()
+
+	log.debug { response: resData }
 	res.json( resData )
 
 # tests need this: jenkins will ping to check if device is online
@@ -71,7 +76,7 @@ app.get '/ping', (req, res) ->
 
 # tests need this: jenkins will trigger this
 app.get '/start', (req, res) ->
-	log.info 'Got Start testing request from: '  +  req.ip
+	log.info 'Got Start testing request from: '	+	req.ip
 
 	config.appName = req.query.app
 	config.img.appId = req.query.appId
