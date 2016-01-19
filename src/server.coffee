@@ -34,14 +34,15 @@ app.get '/jstatus', (req, res) ->
 	if !fsm.current_state_name? or fsm.current_state_name == 'Waiting'
 		mode = 'free'
 		state = 'Waiting'
-		if config.lastState == 'rpi booted'
-			state = config.lastState
-		if config.lastState == 'testing finished with error'
-			state = config.lastState
+		if config.lastEvent == 'rpi booted'
+			state = config.lastEvent
+		if config.lastEvent == 'testing finished with error'
+			state = config.lastEvent
 	else
 		mode = 'testing'
-		state = config.lastState #fsm.current_state_name
-	resData =
+		state = config.lastEvent #fsm.current_state_name
+
+  resData =
 		state: state
 		error: config.error
 		started: startTime
@@ -85,12 +86,12 @@ app.get '/start', (req, res) ->
 	if fsm.current_state_name != 'Waiting'
 		log.info 'Test in progress: [STATE] = ' + fsm.current_state_name
 		mode = 'testing'
-		state = config.lastState #fsm.current_state_name
+		state = config.lastEvent #fsm.current_state_name
 	else
 		log.info 'Starting test'
 		mode = 'free'
 		state = 'started'
-		config.lastState = 'started'
+		config.lastEvent = 'started'
 		startTest(config)
 
 	response =

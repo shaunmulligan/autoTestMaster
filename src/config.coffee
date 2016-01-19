@@ -14,8 +14,8 @@ module.exports =
 	uuid: ''
 	log: null
 	state: null
-	#lastState will allow this to work with old polling method
-	lastState: null
+	#lastEvent will allow this to work with old polling method
+	lastEvent: null
 	error: ''
 	timeout: false
 	states: null

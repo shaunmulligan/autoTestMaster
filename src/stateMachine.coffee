@@ -69,7 +69,7 @@ class AutoTester extends NodeState
 							.then ->
 								log.info 'logged as:' + config.credentials.email
 								#emit event here: event: logged-in
-								config.lastState = 'logged in'
+								config.lastEvent = 'logged in'
 								#clean up all devices before we start
 								# TODO: check that application exists:
 								resin.models.device.getAllByApplication(config.appName)
@@ -81,7 +81,7 @@ class AutoTester extends NodeState
 										log.debug 'device remove failures:' + failures
 										if _.isEmpty(failures)
 											log.info 'all devices have been removed from app'
-											config.lastState = 'app is clear of devices'
+											config.lastEvent = 'app is clear of devices'
 											fsm.goto 'DownloadImage', data
 										else
 											error = 'failed to remove some devices'
@@ -117,7 +117,7 @@ class AutoTester extends NodeState
 								stats = fs.statSync(config.img.pathToImg)
 								fileSizeInMb = stats['size'] / 1000000.0
 								log.info 'download size = ' + fileSizeInMb
-								config.lastState = 'image was downloaded'
+								config.lastEvent = 'image was downloaded'
 								#emit event here: event: image-downloaded size: fileSizeInMb
 								if fileSizeInMb < expectedImgSize
 									error = 'download is too small, something went wrong!'
@@ -173,7 +173,7 @@ class AutoTester extends NodeState
 					.then ->
 						log.info('Done!')
 						log.info config.img.pathToImg + ' was written to ' +	data.drive
-						config.lastState = 'image was written'
+						config.lastEvent = 'image was written'
 						#emit event here: event: image-written-to-drive
 						fsm.goto 'EjectMedia'
 					.catch (error) ->
@@ -223,7 +223,7 @@ class AutoTester extends NodeState
 				# @wait 240000
 				poll().timeout(240000).then (uuid) ->
 					log.info 'A device was found: ' + uuid
-					config.lastState = 'rpi booted'
+					config.lastEvent = 'rpi booted'
 					fsm.goto 'TestSuccess'
 				.catch Promise.TimeoutError, (error) ->
 					shouldPoll = false
@@ -244,7 +244,7 @@ class AutoTester extends NodeState
 				@wait 60000 #wait 1 minutes after success
 
 				WaitTimeout: (timeout, data) ->
-					config.lastState = 'testing finished'
+					config.lastEvent = 'testing finished'
 					#emit event here: event: test-success
 					log.debug 'waiting a bit to confirm success'
 					fsm.goto 'Waiting'
@@ -264,7 +264,7 @@ class AutoTester extends NodeState
 				# to initial state
 				log.info '[STATE] ' + @current_state_name
 				log.error 'Error occured in ' + data.state + ': ' + data.error
-				config.lastState = 'testing finished with error'
+				config.lastEvent = 'testing finished with error'
 				config.error = data.error
 				#emit event here: event: error error:data.error
 				@goto 'Waiting'
