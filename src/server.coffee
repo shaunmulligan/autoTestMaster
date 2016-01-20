@@ -2,7 +2,8 @@ express = require 'express'
 AutoTester = require './stateMachine'
 config = require './config'
 bunyan = require 'bunyan'
-
+physicalMedia = require './connectPhysical'
+physicalMedia.allOff()
 logLevel = process.env.LOG_LEVEL or 'info'
 logSettings =
 	name: 'server'
@@ -118,4 +119,4 @@ startTest = (testData) ->
 	fsm.start()
 
 log.info 'Starting Server'
-app.listen(process.env.PORT or 8080)
+app.listen(process.env.PORT or 80)
