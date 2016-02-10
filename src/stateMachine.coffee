@@ -141,8 +141,6 @@ class AutoTester extends NodeState
 				fsm = this
 				log.info '[STATE] ' + @current_state_name
 				physicalMedia.allOff()
-				@wait 10000 # timeout if media takes too long to mount
-
 				scanner = new DrivelistScanner(interval: 1000, drives: [ ])
 				physicalMedia.connectUsb()
 				log.info 'Mounting Install Media'
@@ -154,7 +152,12 @@ class AutoTester extends NodeState
 					fsm.unwait()
 					fsm.goto 'WriteMedia', { drive: drives.device }
 
+				@wait 10000 , { scan: scanner } # timeout if media takes too long to mount
+
 			WaitTimeout: (timeout, data) ->
+				console.log data.scan
+				scanner = data.scan
+				scanner.stop()
 				fsm = this
 				error = 'timeout reached, unable to mount the USB media'
 				@goto 'ErrorState', { error: error, state: fsm.current_state_name }
