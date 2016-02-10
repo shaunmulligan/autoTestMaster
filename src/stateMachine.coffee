@@ -31,7 +31,7 @@ logSettings =
 log = bunyan.createLogger logSettings
 
 expectedImgSize = 1400.0
-
+scanner = null
 #probably should break these out into a utils module
 removeAllDevices = (uuids) ->
 	#TODO: rather use Promise.map([ 'a', 'b', 'c' ], resin.models.device.remove)
@@ -152,11 +152,10 @@ class AutoTester extends NodeState
 					fsm.unwait()
 					fsm.goto 'WriteMedia', { drive: drives.device }
 
-				@wait 10000 , { scan: scanner } # timeout if media takes too long to mount
+				@wait 10000 # timeout if media takes too long to mount
 
 			WaitTimeout: (timeout, data) ->
-				console.log data.scan
-				scanner = data.scan
+				console.log scanner
 				scanner.stop()
 				fsm = this
 				error = 'timeout reached, unable to mount the USB media'
