@@ -8,7 +8,7 @@ RUN apt-key adv --keyserver pgp.mit.edu  --recv-key 0x9165938D90FDDD2E
 # Install dependencies.
 RUN apt-get update \
 	&& apt-get install -yq wget \
-  build-essentials \
+  build-essential \
   python \
 	# Remove package lists to free up space
 	&& rm -rf /var/lib/apt/lists/*
