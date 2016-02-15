@@ -1,38 +1,25 @@
-FROM resin/raspberrypi2-node:4.0.0
-MAINTAINER Shaun Mulligan <shaun@ resin.io>
+# Warning: This is a test base image, please do not use in production!!
+FROM nghiant2710/device-sync:jessie
 
-RUN apt-get update && apt-get install -yq\
-    openssh-server\
-    jq\
-    curl\
-    rsync && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+# Add the apt sources for raspbian
+RUN echo "deb http://archive.raspbian.org/raspbian jessie main contrib non-free rpi firmware" >>  /etc/apt/sources.list
+RUN apt-key adv --keyserver pgp.mit.edu  --recv-key 0x9165938D90FDDD2E
 
-#TODO: remove password login.
-RUN mkdir /var/run/sshd
-RUN echo 'root:resin' | chpasswd
-RUN sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-RUN sed -i 's/UsePAM yes/UsePAM no/' /etc/ssh/sshd_config
+# Install dependencies.
+RUN apt-get update \
+	&& apt-get install -yq wget \
+	# Remove package lists to free up space
+	&& rm -rf /var/lib/apt/lists/*
 
-# SSH login fix. Otherwise user is kicked off after login
-RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
+# Install Node.js
+RUN wget https://nodejs.org/dist/v4.0.0/node-v4.0.0-linux-armv7l.tar.gz && \
+		tar -xvf node-v4.0.0-linux-armv7l.tar.gz && \
+		cd node-v4.0.0-linux-armv7l && \
+		cp -R * /usr/local/
 
-#change the port of systemd-sshd to 80
-#TODO find a better way to do this.
-RUN sed -i 's/ListenStream=22/ListenStream=8080/' /lib/systemd/system/ssh.socket
-RUN sed -i 's/sshd -D $SSHD_OPTS/sshd -D -p8080 $SSHD_OPTS/' /lib/systemd/system/ssh.service
-
-#create the ssh keys dir with correct perms
-RUN mkdir -p /root/.ssh
-#COPY keys/id_rsa.pub /root/.ssh/authorized_keys
-RUN chmod 700  /root/.ssh
-#RUN chmod 640  /root/.ssh/authorized_keys
-
-#=================================================================
-#User Dockerfile
-
-#Enable systemd init system in the container
-ENV INITSYSTEM on
+# These env vars enable sync_mode on all devices.
+ENV SYNC_MODE=on
+ENV INITSYSTEM=on
 ENV VERSION 2
 RUN npm install -g coffee-script
 RUN mkdir -p /usr/src/app && ln -s /usr/src/app /app
