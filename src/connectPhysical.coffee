@@ -16,10 +16,20 @@ exports.connectSd = ->
 	usbConn.value(0)
 	sdCardConn.value(1)
 
-exports.powerSlave = ->
+exports.powerSlaveWithBootMedia = ->
 	usbConn.value(0)
 	sdCardConn.value(1)
 	slaveConn.value(1)
+
+exports.powerSlave = ->
+	usbConn.value(0)
+	sdCardConn.value(0)
+	slaveCon.value(1)
+
+exports.unmountBootMedia = ->
+	usbConn.value(0)
+	sdCardConn.value(0)
+	slaveCon.value(0)
 
 exports.allOff = ->
 	usbConn.value(0)

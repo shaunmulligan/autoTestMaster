@@ -38,16 +38,48 @@ removeAllDevices = (uuids) ->
 	#this only resolves the promise all mapped promises resolve
 	return Promise.all(uuids.map(resin.models.device.remove))
 
-shouldPoll = true
+shouldPollApp = true
+shouldPollProvisioningState = true
+shouldPollDeviceState = true
 
-poll = ->
+# TODO: need to .catch here properly
+# this is a hack
+pollApp = ->
 	return resin.models.device.getAllByApplication(config.appName)
 	.then (devices) ->
 		if !_.isEmpty(devices)
 			return devices[0]?.uuid
-		if shouldPoll
+		if shouldPollApp
 			log.info 'polling...'
-			Promise.delay(3000).then(poll)
+			Promise.delay(3000).then(pollApp)
+	.cancellable()
+
+# this is a hack
+pollProvisioningState = (uuid) ->
+	return resin.models.device.get(uuid)
+	.then (device) ->
+		result = []
+		result[0] = device.provisioning_state
+		result[1] = device.provisioning_progress
+		result[2] = device.is_online
+		if result[0] == 'Post-Provisioning'
+			return result
+		if shouldPollProvisioningState
+			log.info 'polling device state...'
+			log.debug result
+			Promise.delay(3000).then(pollProvisioningState(uuid))
+	.cancellable()
+
+pollDeviceState = (uuid) ->
+	return resin.models.device.get(uuid)
+	.then (device) ->
+		result = device.is_online
+		if result == true
+			return result
+		if shouldPollDeviceState
+			log.info 'is device online yet...'
+			log.debug result
+			Promise.delay(3000).then(pollDeviceState(uuid))
 	.cancellable()
 
 class AutoTester extends NodeState
@@ -82,7 +114,9 @@ class AutoTester extends NodeState
 										if _.isEmpty(failures)
 											log.info 'all devices have been removed from app'
 											config.lastEvent = 'app is clear of devices'
-											fsm.goto 'DownloadImage', data
+											#fsm.goto 'DownloadImage', data
+											# skip the download during testing
+											fsm.goto 'MountMedia' , { fileSize: null }
 										else
 											error = 'failed to remove some devices'
 											fsm.goto 'ErrorState' , { error: error, state: fsm.current_state_name }
@@ -206,7 +240,7 @@ class AutoTester extends NodeState
 				log.info '[STATE] ' + @current_state_name
 				#wait 30seconds for the power to be applied
 				@wait 30000
-				physicalMedia.powerSlave()
+				physicalMedia.powerSlaveWithBootMedia()
 				#emit event here: event: slave-powered-up
 				# TODO: need to have a GPIO input to check that power actually applied
 				@goto 'DeviceOnDashboard'
@@ -223,16 +257,16 @@ class AutoTester extends NodeState
 				log.info '[STATE] ' + @current_state_name
 				#start a timer, timeout after 4 minutes of waiting
 
-				poll().timeout(240000).then (uuid) ->
+				pollApp().timeout(240000).then (uuid) ->
 					log.info 'A device was found: ' + uuid
 					config.lastEvent = 'rpi booted'
 
-          if config.img.devType == 'nuc'
-            fsm.goto 'postProvisioning'
-          else
-            fsm.goto 'TestSuccess'
+					if config.img.devType == 'nuc'
+						fsm.goto 'PostProvision' , { UUID: uuid }
+					else
+						fsm.goto 'TestSuccess'
 				.catch Promise.TimeoutError, (error) ->
-					shouldPoll = false
+					shouldPollApp = false
 					fsm.goto 'ErrorState', { error: error, state: fsm.current_state_name }
 				.catch (error) ->
 					fsm.goto 'ErrorState', { error: error, state: fsm.current_state_name }
@@ -241,6 +275,51 @@ class AutoTester extends NodeState
 				fsm = this
 				error = 'Device never showed up on dashboard'
 				@goto 'ErrorState', { error: error, state: fsm.current_state_name }
+
+		PostProvision:
+			Enter: (data) ->
+				fsm = this
+				log.info '[STATE] ' + @current_state_name
+
+				pollProvisioningState(data.UUID).timeout(240000)
+				.then (result) ->
+					log.info 'device is in ' + result[0] + 'state'
+					fsm.goto 'UnmountBootMedia' , data
+				.catch Promise.TimeoutError, (error) ->
+					shouldPollProvisioningState = false
+					fsm.goto 'ErrorState', { error: error, state: fsm.current_state_name }
+				.catch (error) ->
+					fsm.goto 'ErrorState', { error: error, state: fsm.current_state_name }
+
+		UnmountBootMedia:
+			Enter: (data) ->
+				fsm = this
+				log.info '[STATE] ' + @current_state_name
+				physicalMedia.unmountBootMedia()
+
+				fsm.goto 'PowerCycleSlave' , data
+
+		PowerCycleSlave:
+			Enter: (data) ->
+				fsm = this
+				log.info '[STATE] ' + @current_state_name
+				physicalMedia.powerSlave()
+				fsm.goto 'WaitForOnlineDevice' , data
+
+		WaitForOnlineDevice:
+			Enter: (data) ->
+				fsm = this
+				log.info '[STATE] ' + @current_state_name
+
+				pollDeviceState(data.UUID).timeout(240000)
+				.then (result) ->
+					log.info 'device is back online'
+					fsm.goto 'TestSuccess'
+				.catch Promise.TimeoutError, (error) ->
+					shouldPollDeviceState = false
+					fsm.goto 'ErrorState', { error: error, state: fsm.current_state_name }
+				.catch (error) ->
+					fsm.goto 'ErrorState', { error: error, state: fsm.current_state_name }
 
 		TestSuccess:
 			Enter: (data) ->
