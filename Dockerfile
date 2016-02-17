@@ -26,7 +26,7 @@ ENV INITSYSTEM=on
 COPY entry.sh /usr/bin/entry.sh
 
 ENV VERSION 2
-RUN sudo npm install -g coffee-script
+RUN npm install --unsafe-perm -g coffee-script
 RUN mkdir -p /usr/src/app && ln -s /usr/src/app /app
 WORKDIR /usr/src/app
 COPY . /usr/src/app
