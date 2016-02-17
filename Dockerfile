@@ -22,6 +22,8 @@ RUN wget https://nodejs.org/dist/v4.0.0/node-v4.0.0-linux-armv7l.tar.gz && \
 # These env vars enable sync_mode on all devices.
 ENV SYNC_MODE=on
 ENV INITSYSTEM=on
+COPY entry.sh /usr/bin/entry.sh 
+
 ENV VERSION 2
 RUN npm install -g coffee-script
 RUN mkdir -p /usr/src/app && ln -s /usr/src/app /app
