@@ -10,6 +10,7 @@ RUN apt-get update \
 	&& apt-get install -yq wget \
   build-essential \
   python \
+  sudo \
 	# Remove package lists to free up space
 	&& rm -rf /var/lib/apt/lists/*
 
@@ -22,10 +23,10 @@ RUN wget https://nodejs.org/dist/v4.0.0/node-v4.0.0-linux-armv7l.tar.gz && \
 # These env vars enable sync_mode on all devices.
 ENV SYNC_MODE=on
 ENV INITSYSTEM=on
-COPY entry.sh /usr/bin/entry.sh 
+COPY entry.sh /usr/bin/entry.sh
 
 ENV VERSION 2
-RUN npm install -g coffee-script
+RUN sudo npm install -g coffee-script
 RUN mkdir -p /usr/src/app && ln -s /usr/src/app /app
 WORKDIR /usr/src/app
 COPY . /usr/src/app
