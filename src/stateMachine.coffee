@@ -226,7 +226,11 @@ class AutoTester extends NodeState
 				poll().timeout(240000).then (uuid) ->
 					log.info 'A device was found: ' + uuid
 					config.lastEvent = 'rpi booted'
-					fsm.goto 'TestSuccess'
+
+          if config.img.devType == 'nuc'
+            fsm.goto 'postProvisioning'
+          else
+            fsm.goto 'TestSuccess'
 				.catch Promise.TimeoutError, (error) ->
 					shouldPoll = false
 					fsm.goto 'ErrorState', { error: error, state: fsm.current_state_name }

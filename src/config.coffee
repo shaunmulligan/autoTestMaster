@@ -9,6 +9,7 @@ SSID = process.env.SSID or 'Techspace'
 WIFI_PASS = process.env.WIFI_PASS or 'cak-wy-rum'
 TEST_ENV_TARGET = process.env.TEST_ENV_TARGET or 'https://api.resin.io'
 IMG_PATH = process.env.IMG_PATH or './test.img'
+DEV_TYPE = process.env.DEV_TYPE or 'nuc'
 
 module.exports =
 	uuid: ''
@@ -31,6 +32,7 @@ module.exports =
 		uiHost: ''
 		apiHost: TEST_ENV_TARGET
 		pathToImg: IMG_PATH
+		devType: DEV_TYPE
 	credentials:
 		email: USERNAME
 		password: USER_PASS
