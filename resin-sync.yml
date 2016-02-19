@@ -1,0 +1,12 @@
+source: ./
+before: 'echo "I will run before syncing to the device..."'
+ignore:
+    - .git
+    - Dockerfile
+    - resin-sync.yml
+    - .DS_Store
+    - coffeelint.json
+    - sync.sh
+progress: true
+watch: false
+port: 8080
