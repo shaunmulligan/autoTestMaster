@@ -223,7 +223,6 @@ class AutoTester extends NodeState
 				#start a timer, timeout after 4 minutes of waiting
 				pollApp().timeout(240000).then (uuid) =>
 					log.info 'A device was found: ' + uuid
-					config.lastEvent = 'rpi booted'
 					# TODO: Need a more generic way of doing switch between devic-types
 					if config.img.devType == 'nuc'
 						@goto 'PostProvision' , { UUID: uuid }
@@ -293,6 +292,7 @@ class AutoTester extends NodeState
 		TestSuccess:
 			Enter: (data) ->
 				log.info '[STATE] ' + @current_state_name
+				config.lastEvent = 'device booted'
 				log.info 'Successfully provisioned Slave device'
 				@goto 'Waiting'
 
