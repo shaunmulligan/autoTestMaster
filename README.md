@@ -2,7 +2,9 @@
 
 #### TODO:
 
-* make multi-device type
+* set DEV_TYPE for different device types
+* set the update.lock so that container cant be restarted during a test
+* enable a way to shut down ethernet Network
 * detect power connected on slave
 * switch to promise based GPIO: https://github.com/k2wanko/node-pi-gpio
 * ability to change target test env (prod or staging)

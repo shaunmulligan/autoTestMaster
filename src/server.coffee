@@ -2,7 +2,8 @@ express = require 'express'
 AutoTester = require './stateMachine'
 config = require './config'
 bunyan = require 'bunyan'
-
+physicalMedia = require './connectPhysical'
+physicalMedia.allOff()
 logLevel = process.env.LOG_LEVEL or 'info'
 logSettings =
 	name: 'server'
@@ -37,7 +38,7 @@ app.get '/jstatus', (req, res) ->
 	if !fsm.current_state_name? or fsm.current_state_name == 'Waiting'
 		mode = 'free'
 		state = 'Waiting'
-		if config.lastEvent == 'rpi booted'
+		if config.lastEvent == 'device booted'
 			state = config.lastEvent
 		else if config.lastEvent == 'testing finished with error'
 			state = config.lastEvent
@@ -118,4 +119,4 @@ startTest = (testData) ->
 	fsm.start()
 
 log.info 'Starting Server'
-app.listen(process.env.PORT or 8080)
+app.listen(process.env.PORT or 80)

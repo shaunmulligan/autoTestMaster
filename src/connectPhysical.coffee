@@ -3,21 +3,35 @@ sdCardConn = Gpio.connect(17)
 usbConn = Gpio.connect(18)
 slaveConn = Gpio.connect(27)
 
+sdCardConn.mode('out')
+usbConn.mode('out')
+slaveConn.mode('out')
+
 exports.connectUsb = ->
-	usbConn.mode('high')
+	usbConn.value(1)
 	# SD card should always be disconnected if USB side is connected
-	sdCardConn.mode('low')
+	sdCardConn.value(0)
 
 exports.connectSd = ->
-	usbConn.mode('low')
-	sdCardConn.mode('high')
+	usbConn.value(0)
+	sdCardConn.value(1)
+
+exports.powerSlaveWithBootMedia = ->
+	usbConn.value(0)
+	sdCardConn.value(1)
+	slaveConn.value(1)
 
 exports.powerSlave = ->
-	usbConn.mode('low')
-	sdCardConn.mode('high')
-	slaveConn.mode('high')
+	usbConn.value(0)
+	sdCardConn.value(0)
+	slaveConn.value(1)
+
+exports.unmountBootMedia = ->
+	usbConn.value(0)
+	sdCardConn.value(0)
+	slaveConn.value(1)
 
 exports.allOff = ->
-	usbConn.mode('low')
-	sdCardConn.mode('low')
-	slaveConn.mode('low')
+	usbConn.value(0)
+	sdCardConn.value(0)
+	slaveConn.value(0)
